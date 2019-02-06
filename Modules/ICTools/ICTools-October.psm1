@@ -1,7 +1,7 @@
 ﻿Function Get-InactiveUsers {
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
-.DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them 
+.DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
             to file, disabling them, moving them, or any combination.
 .PARAMETER Time
 .PARAMETER Path
@@ -14,7 +14,7 @@
 .EXAMPLE
 #>
     [cmdletbinding(SupportsShouldProcess=$True)]
-        
+
         param(
 
         [string]$Time=90,
@@ -62,7 +62,7 @@
                 }
             }
             else {
-                $InactivePresort = Get-ADUser -Filter {LastLogonTimeStamp -lt $Period -and enabled -eq $true} -Properties LastLogonTimeStamp 
+                $InactivePresort = Get-ADUser -Filter {LastLogonTimeStamp -lt $Period -and enabled -eq $true} -Properties LastLogonTimeStamp
                 $Inactive = $InactivePresort | select-object Name,SamAccountName,@{Name="Last Logon Time"; Expression={[DateTime]::FromFileTime($_.lastLogonTimestamp).ToString('yyyy-MM-dd_hh:mm:ss')}} | Sort-Object Name
                 if ($Export) {
                     Write-Verbose "Exporting to CSV"
@@ -78,13 +78,13 @@
                     $ORG = $ORGU | Out-GridView -Title "Please Choose the Target OU" -OutputMode Single
                 }
                 else {
-                    $ORG = $ORGU                
+                    $ORG = $ORGU
                 }
-                $InactivePresort | Move-ADObject -TargetPath $ORG.Distinguishedname                
+                $InactivePresort | Move-ADObject -TargetPath $ORG.Distinguishedname
             }
             if($Disable) {
                 $InactivePresort | Disable-ADAccount
-                
+
             }
         }
         End{
@@ -109,8 +109,8 @@ Synopsis
             [string]$LogDir = "C:\Temp",
 
             [int32]$LastLogon = "60",
-            
-            [switch]$UseList            
+
+            [switch]$UseList
         )
     Begin{
         $RunTimeLoop = (Get-Date).AddHours($RunTime)
@@ -119,13 +119,19 @@ Synopsis
         }
     }
     Process{
-        if ($UseList){
+        While((Get-date) -le $RunTimeLoop){
+            <#$WRMComp = @()
+            $NWRM = @()
+            $date = (get-date).AddDays(-$LastLogon)#>
+            if($LogOnly -or $RunOnce){
+                $RunTimeLoop = (Get-Date)
+            }
+            if ($UseList){
                 $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
                 $NWRM = Import-Clixml -Path $LogDir\NOWRM.xml
             }
-        else {
-                Start-Job -Name Verify -ArgumentList $RunTime,$LastLogon,$Logdir,$RunOnce{
-                    Param($RunTime,$LastLogon,$Logdir,$RunOnce)
+            else {
+                Start-Job -Name Verify {
                     if($RunOnce){
                         Get-OnlineADComps -RunTime $RunTime -LastLogon $LastLogon -LogDir $LogDir -RunOnce
                     }
@@ -143,17 +149,35 @@ Synopsis
                     else {
                         Start-Sleep -Seconds 10
                     }
-                } 
+                }
+               <#$computers = Get-ADComputer -Filter * -Properties LastLogonDate | where lastlogondate -GE $date
+                ForEach ($comp in $computers) {
+                    if (Test-Connection -ComputerName $comp.name -Count 1 -Quiet) {
+                        Write-Host $comp.name "is Alive"
+                        if ([bool](Test-WSMan -ComputerName $comp.Name -ErrorAction SilentlyContinue)){
+                            $WRMComp += $comp
+                        }
+                        else {
+                            $NWRM += $comp
+                        }
+                    }#>
+                    <#$WRMComp | Export-Clixml $LogDir\WRMComp.xml
+                    $NWRM | Export-Clixml $LogDir\NOWRM.xml
+                    $NWRM | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NWRM.csv -Append -NoTypeInformation#>
+                <#}
+                $WRMComp | Export-Clixml $LogDir\WRMComp.xml
+                $NWRM | Export-Clixml $LogDir\NOWRM.xml
+                $NWRM | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NWRM.csv -Append -NoTypeInformation
+            }#>
             }
-        #Start-Job -Name LegacyJob -ScriptBlock {Remove-EmotetLegacy -ComputerName ($NWRM.name) -LogDir $LogDir -Logonly $LogOnly}
-        $looptime = (Get-Date).AddHours($RunTime)
-        while ((Get-Date) -le $looptime){
+            Start-Job -Name LegacyJob -ScriptBlock {Remove-EmotetLegacy -ComputerName ($NWRM.name) -LogDir $LogDir -Logonly $LogOnly}
+            $looptime = (Get-Date).AddMinutes(30)
+            while ((Get-Date) -le $looptime){
                 if($LogOnly -or $RunOnce){
                     $looptime = (Get-Date)
                 }
-                $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                #$ScanTime = (Get-Date).ToString('yyyy-MM-dd')
-                if (Test-Path "$LogDir\exclude32.txt") {   
+                $ScanTime = (Get-Date).ToString('yyyy-MM-dd')
+                if (Test-Path "$LogDir\exclude32.txt") {
                     $exclude32 = Get-Content -Path $LogDir\exclude32.txt
                 }
                 if (Test-Path "$LogDir\exclude64.txt") {
@@ -162,14 +186,13 @@ Synopsis
                 if (Test-Path "$LogDir\excludewindows.txt") {
                     $excludewin = Get-Content -Path $LogDir\excludewindows.txt
                 }
-                Invoke-Command -ComputerName $WRMComp.name -ArgumentList $LogOnly,$exclude32,$exclude64,$excludewin -ErrorAction SilentlyContinue -ErrorVariable NoConnect {
+                Invoke-Command -ComputerName $WRMComp.name -ArgumentList $LogOnly,$exclude32,$exclude64,$excludewin{
                     param($LogOnly,$exclude32,$exclude64,$excludewin)
                     $deletedfiles = @()
                     $ComputerName = $env:COMPUTERNAME
                     if (Test-Path -Path "C:\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path C:\windows\syswow64 *.exe | where {$_.creationtime -ge (get-date).AddDays(-3) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -178,7 +201,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -191,7 +214,7 @@ Synopsis
                                     }
                                     if ($filedeleted){
                                         $delstatus = "Yes"
-                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Yellow
+                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Red
                                     }
                                     else {
                                         $delstatus = "No"
@@ -213,14 +236,10 @@ Synopsis
                                 write-host "$ComputerName 64 Bit System Did not detect Dropper" -ForegroundColor Green
                                 }
                         }
-                            }else{
-                                write-host "$ComputerName 64 Bit System Did not detect Dropper" -ForegroundColor Green
-                            }
                     }
                     if (!(Test-Path -Path "C:\windows\SysWOW64")) {
-                        $file = Get-ChildItem -Path C:\windows\system32 *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -229,7 +248,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -242,7 +261,7 @@ Synopsis
                                         }
                                     if ($filedeleted){
                                         $delstatus = "Yes"
-                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Yellow
+                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Red
                                     }
                                     else {
                                         $delstatus = "No"
@@ -264,13 +283,9 @@ Synopsis
                                 write-host "$ComputerName 32 Bit System Did not detect Dropper" -ForegroundColor Green
                                 }
                         }
-                            }else{
-                                write-host "$ComputerName 32 Bit System Did not detect Dropper" -ForegroundColor Green
-                            }
                     }
-                    $file = get-childitem -Path C:\Windows*.exe,c:\windows\temp\*.exe | where {$_.creationtime -ge (get-date).AddDays(-2) -and $_.Name -match "(?i)(\w{8}\.exe)" -and $_.name -notmatch $excludewin}
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                    $file = get-childitem -Path "C:\Windows" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.Name -match "(?i)(\w{8}\.exe)" -and $_.name -notmatch $excludewin}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -279,7 +294,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -292,7 +307,7 @@ Synopsis
                                     }
                                     if ($filedeleted){
                                         $delstatus = "Yes"
-                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Yellow
+                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Red
                                     }
                                     else {
                                         $delstatus = "No"
@@ -315,12 +330,8 @@ Synopsis
                                 write-host "$ComputerName Windows Directory does not have any emotet files" -ForegroundColor Green
                                 }
                             }
-                            }else{
-                                write-host "$ComputerName Windows Directory does not have any emotet files" -ForegroundColor Green
-                            }
-                    $file = get-childitem -path C:\Users\*\AppData\Roaming,c:\windows\ * -Recurse -Force -ErrorAction SilentlyContinue | where {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^tetup\.exe|^wbM\w+\.exe|^mtwvc\.exe" -or $_.FullName -match "(?i)(appdata\\.*\\aim\w$)|(appdata\\.*\\WSOG$)|(appdata\\.*\\AMNI$)|(appdata\\.*\\WSIGE$)"}
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                    $file = get-childitem -path C:\Users\*\AppData,c:\windows\ * -Recurse -Force -ErrorAction SilentlyContinue | where {$_.fullname -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^tetup\.exe|^wbM\w+\.exe|(?i)(appdata\\.*\\aim\w$)"}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -329,7 +340,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -342,7 +353,7 @@ Synopsis
                                     }
                                     if ($filedeleted){
                                         $delstatus = "Yes"
-                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Yellow
+                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Red
                                     }
                                     else {
                                         $delstatus = "No"
@@ -362,15 +373,11 @@ Synopsis
                                     $deletedfiles += $FileObj
                                     #$deletedfiles += ($bfile | select name,directory,creationtime)
                                 }else{
-                                Write-Host "$ComputerName C:\Users\Username\Appdata and C:\Windows does not have 44 Trickbot files" -ForegroundColor Green
+                                Write-Host "$ComputerName C:\Users\Username\Appdata and C:\Windows does not have 44Trojan files" -ForegroundColor Yellow
                                 }
                             }
-                            }else{
-                                Write-Host "$ComputerName C:\Users\Username\Appdata and C:\Windows does not have 44 Trickbot files" -ForegroundColor Green
-                            }
-                    $file = get-childitem -path C:\  *.exe | where {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^mtwvc\.exe"}
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                    $file = get-childitem -path C:\  *.exe | where {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$"}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -379,7 +386,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -392,7 +399,7 @@ Synopsis
                                     }
                                     if ($filedeleted){
                                         $delstatus = "Yes"
-                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Yellow
+                                        write-host "$filepath was detected on $ComputerName and was deleted" -ForegroundColor Red
                                     }
                                     else {
                                         $delstatus = "No"
@@ -412,15 +419,11 @@ Synopsis
                                     $deletedfiles += $FileObj
                                     #$deletedfiles += ($bfile | select name,directory,creationtime)
                                 }else{
-                                write-host "$ComputerName C:\ Directory does not have 44 Trickbot files" -ForegroundColor Green
+                                write-host "$ComputerName C:\ Directory does not have 44Trojan files" -ForegroundColor Green
                                 }
                             }
-                            }else{
-                                write-host "$ComputerName C:\ Directory does not have 44 Trickbot files" -ForegroundColor Green
-                            }
-                    $file = get-childitem -path C:\Windows\System32\Tasks  * | where {$_.name -match "Msne?tcs|Sysnetsf"}
-                            if([bool]$file){
-                                foreach ($bfile in $file){
+                    $file = get-childitem -path C:\Windows\System32\Tasks  * | where {$_.name -match "Msne?tcs"}
+                            foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
                                     $filepath = $bfile.fullname
@@ -431,7 +434,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }#>
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -464,32 +467,18 @@ Synopsis
                                     $deletedfiles += $FileObj
                                     #$deletedfiles += ($bfile | select name,directory,creationtime)
                                 }else{
-                                write-host "$ComputerName C:\windows\system32\tasks Directory does not have trickbot files" -ForegroundColor Green
+                                write-host "$ComputerName C:\windows\system32\tasks Directory does not have tickbot files" -ForegroundColor Green
                                 }
-                            }
-                            }else{
-                                write-host "$ComputerName C:\windows\system32\tasks Directory does not have trickbot files" -ForegroundColor Green
                             }
                 $deletedfiles
                 } | Select-Object Name,Directory,CreationDate,Deleted,Command,Type,ComputerName,TimeStamp | Export-Csv -Path $LogDir\Deleted-Emotet-Files.csv -Append -Force -NoTypeInformation
-                if ([bool]$Noconnect){
-                    $Noconnect | Export-Clixml "$LogDir\CantConnect $(Get-Date -Format 'dd-MM-yyyy HH-mm-ss').xml"
-                }
             #Start-Sleep -Seconds 30
             }
+        }
     }
     End{
-        $RunningJobs = Get-Job
-        foreach ($job in $RunningJobs){
-            if ($job.name -eq "Verify" -and $job.State -eq "Running"){
-                Stop-Job -Name Verify -ErrorAction SilentlyContinue
-                Remove-Job -Name Verify -ErrorAction SilentlyContinue
-            }
-            if ($job.name -eq "LegacyJob" -and $job.State -eq "Running"){
-                Stop-Job -Name LegacyJob -ErrorAction SilentlyContinue            
-                Remove-Job -Name LegacyJob -ErrorAction SilentlyContinue
-            }
-        }
+        Stop-Job -Name Verify -ErrorAction SilentlyContinue
+        Stop-Job -Name LegacyJob -ErrorAction SilentlyContinue
         $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
         Rename-Item -Path $LogDir\Deleted-Emotet-Files.csv -NewName Deleted-Emotet-Files-RuntimeEnded-$FTimeStamp.csv
     }
@@ -499,6 +488,11 @@ Synopsis
 Function Remove-EmotetLegacy{
 <#
 Synopsis
+
+
+
+
+
 #>
     [cmdletbinding()]
         param(
@@ -518,7 +512,7 @@ Synopsis
                     $serversn = $Computer.name
                     Start-Job {Start-Process $Logdir\psexec.exe -ArgumentList "\\$serversn -s winrm.cmd quickconfig -q" -NoNewWindow}
                     if (Test-Path -Path "\\$serversn\c$\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -527,7 +521,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -561,7 +555,7 @@ Synopsis
                         }
                     }
                     if (!(Test-Path -Path "\\$serversn\c$\SysWOW64")) {
-                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -570,7 +564,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -612,7 +606,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -668,8 +662,8 @@ Synopsis
             [string]$LogDir = "C:\Temp",
 
             [int32]$LastLogon = "60",
-            
-            [switch]$UseList            
+
+            [switch]$UseList
         )
     Begin{
         $RunTimeLoop = (Get-Date).AddHours($RunTime)
@@ -716,7 +710,7 @@ Synopsis
                     $looptime = (Get-Date)
                 }
                 $ScanTime = (Get-Date).ToString('yyyy-MM-dd')
-                if (Test-Path "$LogDir\exclude32.txt") {   
+                if (Test-Path "$LogDir\exclude32.txt") {
                     $exclude32 = Get-Content -Path $LogDir\exclude32.txt
                 }
                 if (Test-Path "$LogDir\exclude64.txt") {
@@ -730,7 +724,7 @@ Synopsis
                     $deletedfiles = @()
                     $ComputerName = $env:COMPUTERNAME
                     <#if (Test-Path -Path "C:\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -740,7 +734,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -777,7 +771,7 @@ Synopsis
                         }
                     }
                     if (!(Test-Path -Path "C:\windows\SysWOW64")) {
-                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -787,7 +781,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -833,7 +827,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -879,7 +873,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -925,7 +919,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -973,7 +967,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }#>
                                         #Start-Sleep -Seconds 3
                                         <#try {
@@ -1006,7 +1000,7 @@ Synopsis
                                     $deletedfiles += $FileObj
                                     #$deletedfiles += ($bfile | select name,directory,creationtime)
                                 }else{
-                                write-host "$ComputerName C:\windows\system32\tasks Directory does not have trickbot files" -ForegroundColor Green
+                                write-host "$ComputerName C:\windows\system32\tasks Directory does not have tickbot files" -ForegroundColor Green
                                 }
                             }#>
 
@@ -1034,11 +1028,11 @@ Synopsis
         param(
 
             $RunTime = 24,
-            
+
             [string]$LogDir = "c:\temp",
 
             [int32]$LastLogon = 60,
-            
+
             [switch]$LogOnly,
 
             [switch]$RunOnce
@@ -1057,7 +1051,7 @@ Synopsis
             }
             $computers = Get-ADComputer -Filter * -Properties LastLogonDate | where lastlogondate -GE $date
             ForEach ($comp in $computers) {
-                if (Test-Connection -ComputerName $comp.name -Count 1 -Quiet) {                    
+                if (Test-Connection -ComputerName $comp.name -Count 1 -Quiet) {
                     if ([bool](Test-WSMan -ComputerName $comp.Name -ErrorAction SilentlyContinue)){
                         $WRMComp += $comp
                     }
@@ -1069,210 +1063,16 @@ Synopsis
                 $NWRM | Export-Clixml $LogDir\NOWRM.xml
                 $NWRM | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NWRM.csv -Append -NoTypeInformation#>
             }
-        Write-Output "$($WRMComp.count + $NWRM.count) have been detected online"
-        Write-Output "$($WRMComp.count) are responding via PSRemote"
+        Write-Output "$($computers.count)% have been detected online"
+        Write-Output "$($WRMComp.count)% are responding via PSRemote"
         Write-Output "$($NWRM.count) need to have PSRemoting enabled or addressed"
         $WRMComp | Export-Clixml $LogDir\WRMComp.xml
         $NWRM | Export-Clixml $LogDir\NOWRM.xml
-        $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
-        $NWRM | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NoPSRemoting_$FTimeStamp.csv -Append -NoTypeInformation
+        $NWRM | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NWRM.csv -Append -NoTypeInformation
         }
     }
     End{
     }
 }
 
-function Add-DHCPv4Reservation {
-<#
-#>
-    [cmdletbinding()]
-        param(
-        [parameter(Mandatory=$true)]
-        [string]$CSVPath,
-        
-        [parameter(Mandatory=$true)]
-        [string]$ScopeID
-
-        )
-    Begin{
-        $list = Import-Csv $CSVPath
-    }
-    Process{
-        foreach($item in $list){
-            Add-DhcpServerv4Reservation -ScopeId $ScopeID -IPAddress $item.ipaddress  -Name $item.name -Description $item.description -ClientId $item.clientid
-        }
-    }
-    End{
-    }
-}
-
-function Get-LTServerAdd {
-<#
-synopsis
-#>
-    [cmdletbinding()]
-        param(
-            [string]$LogDir = "c:\temp"
-
-        )
-    Begin{
-        if(!(Test-Path $LogDir)){
-            New-Item -Path $LogDir -ItemType Directory
-        }
-        Start-Job -Name Verify -ArgumentList $Logdir{
-            Param($Logdir)
-                Get-OnlineADComps -RunOnce -LogDir $LogDir
-            }
-        $waiting = $true
-        while($waiting){
-            $VerifyJob = Get-Job -Name Verify
-            if ($VerifyJob.state -ne "Running" -and $VerifyJob.state -ne "Completed"){
-                Write-Host "Could not complete computer query"
-                Receive-Job -Name Verify
-                $waiting = $false
-            }
-            if ($VerifyJob.State -eq "Completed"){
-                $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                $ComputerName = $WRMComp.name
-                Receive-Job -Name Verify
-                $waiting = $false
-            }
-        }
-<#       $noFiles = $true
-        while($noFiles){
-            if ((Test-Path $logdir\WRMComp.xml)-and (Test-Path $logdir\NOWRM.xml)){
-                $noFiles = $false
-                $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                $NWRM = Import-Clixml -Path $LogDir\NOWRM.xml
-            }
-            else {
-                Start-Sleep -Seconds 10
-            }
-        }#>
-    }
-    Process{
-        Invoke-Command -ComputerName $ComputerName{
-            $serveraddress = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'server address'
-            If ([bool]$serveraddress) {
-                $tempobj = @{
-                    Computername = $env:COMPUTERNAME
-                    ServerAddress = $serveraddress
-                }            
-            }
-            else{
-                $tempobj = @{
-                    Computername = $env:COMPUTERNAME
-                    ServerAddress = "Server Address not found"
-                }
-            }
-            $ExportObj = New-Object -TypeName psobject -Property $tempobj
-            $ExportObj
-
-        } | Select-Object Computername,ServerAddress |Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
-    }
-    End{
-        #($NWRM.name).tostring | Export-Csv -Path $LogDir\NoPSComps.csv -NoTypeInformation
-        $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
-        Remove-Item -Path $LogDir\WRMComp.xml
-        Remove-Item -Path $LogDir\NOWRM.xml
-        Remove-Job -Name Verify -ErrorAction SilentlyContinue
-        Rename-Item -Path $LogDir\Get_LTAddr_Log.csv -NewName Get_LTAddr_Log_$FTimeStamp.csv
-
-    }
-}
-
-function Set-LTServerAdd {
-<#
-synopsis
-#>
-
-    [cmdletbinding()]
-        param(
-            
-            [string[]]$ComputerName,
-
-            [string]$Logdir = "C:\temp",
-
-            [parameter(Mandatory=$true)][string]$ServerAddr
-        )
-    Begin{
-        if (![bool]$ComputerName) {
-            $JobRan = $true
-            Start-Job -Name Verify -ArgumentList $Logdir{
-                Param($Logdir)
-                    Get-OnlineADComps -RunOnce -LogDir $LogDir
-            }
-            $waiting = $true
-            While($waiting){
-                $VerifyJob = Get-Job -Name Verify
-                if ($VerifyJob.state -ne "Running" -and $VerifyJob.State -ne "Completed"){
-                    Write-Host "Could not complete computer query"
-                    Receive-Job -Name Verify
-                    $waiting=$false
-                }
-                if($VerifyJob.State -eq "Completed"){
-                    $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                    $ComputerName = $WRMComp.Name
-                    Receive-Job -Name Verify
-                    $waiting = $false                    
-                }
-                else{
-                    Start-Sleep -Seconds 5
-                }
-            }
-        }
-    }
-    Process{
-        #Try {
-            Invoke-Command -ComputerName $ComputerName -ArgumentList $ServerAddr{
-                param($ServerAddr)
-                try {
-                    $currentaddress = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'server address'
-                }
-                catch{
-                }
-                $Targetname = $env:COMPUTERNAME
-                If ([bool]$currentaddress) {
-                    $InitialRegEntry = $currentaddress
-                    if ($currentaddress -ne $ServerAddr){
-                        try {
-                            $keychanged = "Yes"
-                            Stop-Service LTSvcMon,LTService -ErrorAction SilentlyContinue
-                            Set-ItemProperty -Path HKLM:\software\LabTech\Service\ -Name "server address" -Value $ServerAddr -ErrorAction SilentlyContinue
-                        }
-                        catch{
-                            $keychanged = "Error"
-                        }
-                    }
-                    else{
-                        $keychanged = "Already Correct"
-                    }
-                }
-                else{
-                $InitialRegEntry = "Server Address not found"
-                }
-                $tempobj = @{
-                    "ComputerName" = $Targetname
-                    "Initial Registry Entry" = $InitialRegEntry
-                    "Key Changed" = $keychanged
-                }
-                $RegObj = New-Object -TypeName psobject -Property $tempobj
-                $RegObj
-            } | Select-Object "ComputerName","Initial Registry Entry","Key Changed" | Export-Csv -Path $LogDir\Set_LTAddr_Log.csv -Append -Force -NoTypeInformation
-        #} 
-        <#Catch{
-            Write-Host "Could not connect to $ComputerName"
-        }#>
-    }
-    End{
-        $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
-        if($JobRan){
-            Remove-Job -Name Verify
-            Remove-Item -Path $LogDir\WRMComp.xml
-            Remove-Item -Path $LogDir\NOWRM.xml
-        }
-        Rename-Item -Path $LogDir\Set_LTAddr_Log.csv -NewName Set_LTAddr_Log_$FTimeStamp.csv
-    }
-}
-
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd
+Export-ModuleMember -Function Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps
