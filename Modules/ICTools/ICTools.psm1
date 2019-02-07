@@ -1193,7 +1193,7 @@ synopsis
 
             [string]$Logdir = "C:\temp",
 
-            [parameter(Mandatory=$true)][string]$ServerAddr
+            [string]$ServerAddr = "https://cwa.incare360.com"
         )
     Begin{
         if (![bool]$ComputerName) {
@@ -1239,6 +1239,7 @@ synopsis
                             $keychanged = "Yes"
                             Stop-Service LTSvcMon,LTService -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path HKLM:\software\LabTech\Service\ -Name "server address" -Value $ServerAddr -ErrorAction SilentlyContinue
+                            Start-Service LTSvcMon,LTService -ErrorAction SilentlyContinue
                         }
                         catch{
                             $keychanged = "Error"
