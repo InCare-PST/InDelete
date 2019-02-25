@@ -1,0 +1,31 @@
+**********************
+PowerShell transcript start
+Start time: 20190222155417
+Username: Infected-13\justin
+RunAs User: Infected-13\justin
+Configuration Name: 
+Machine: Infected-13 (Unix 18.2.0.0)
+Host Application: /usr/local/microsoft/powershell/6/pwsh.dll
+Process ID: 21716
+PSVersion: 6.1.1
+PSEdition: Core
+GitCommitId: 6.1.1
+OS: Darwin 18.2.0 Darwin Kernel Version 18.2.0: Thu Dec 20 20:46:53 PST 2018; root:xnu-4903.241.1~1/RELEASE_X86_64
+Platform: Unix
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.10032.0, 6.1.1
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+PS>TerminatingError(Import-Module): "The VMware.ImageBuilder module is not currently supported on the Core edition of PowerShell."
+
+
+An unexpected error occured:
+The VMware.ImageBuilder module is not currently supported on the Core edition of PowerShell.
+
+If requesting support please be sure to include the log file
+   /Users/justin/Documents/GitHub/InDelete/Log.txt
+**********************
+PowerShell transcript end
+End time: 20190222155418
+**********************
