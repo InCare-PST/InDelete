@@ -1,4 +1,5 @@
-﻿function Get-DomainAVStatus{
+
+function Get-DomainAVStatus{
 <#
 #>
     [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -118,7 +119,7 @@
     $password = "Coffeeis4Clos3rz!@!@" | Convertto-SecureString -AsPlainText -Force
     $credentials = New-Object System.Management.Automation.Pscredential -Argumentlist $login,$password
     $MailMessage = @{
-        To = "jgallups@incaretechnologies.com"
+        To = "s@incaretechnologies.com"
         From = "incare.analysis@incare360.com"
         Subject = "InCare Audit for $ClientName"
         Body = "$body"
