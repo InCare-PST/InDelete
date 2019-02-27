@@ -1110,12 +1110,36 @@ function Get-LTServerAdd {
 <#
 synopsis
 #>
-    [cmdletbinding()]
+    [cmdletbinding(DefaultParameterSetName="Default")]
         param(
-            [string]$LogDir = "c:\temp"
+            [Parameter(ParameterSetName="Default")]
+            [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
+            [string]$LogDir = "c:\temp",
+
+            [Parameter(ParameterSetName="Default")]
+            [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
+            [string]$ServerAddr = "https://cwa.incare360.com",
+
+            [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
+            [switch]$report,
+
+            [Parameter(ParameterSetName="Reporting",Mandatory=$true)]
+            [string]$email,
+
+            [Parameter(ParameterSetName="Reporting",Mandatory=$true)]
+            [string]$ClientName
+
+            #[Parameter(ParameterSetName="Reporting",Mandatory=$true)]
+            #[string]$UserName
 
         )
     Begin{
+        if($report){
+            $credentials = Import-Clixml -path "$logdir\incare.xml"
+            #$password = Get-Content "$logdir\incarep.txt" | ConvertTo-SecureString
+            #$Username = Get-Content "$logdir\incareu.txt" | ConvertTo-SecureString
+            #$credentials = New-Object System.Management.Automation.PsCredential($UserName,$password)
+        }
         if(!(Test-Path $LogDir)){
             New-Item -Path $LogDir -ItemType Directory
         }
@@ -1138,20 +1162,9 @@ synopsis
                 $waiting = $false
             }
         }
-<#       $noFiles = $true
-        while($noFiles){
-            if ((Test-Path $logdir\WRMComp.xml)-and (Test-Path $logdir\NOWRM.xml)){
-                $noFiles = $false
-                $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                $NWRM = Import-Clixml -Path $LogDir\NOWRM.xml
-            }
-            else {
-                Start-Sleep -Seconds 10
-            }
-        }#>
     }
     Process{
-        Invoke-Command -ComputerName $ComputerName{
+        $agentlist = Invoke-Command -ComputerName $ComputerName{
             $serveraddress = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'server address'
             If ([bool]$serveraddress) {
                 $tempobj = @{
@@ -1160,23 +1173,60 @@ synopsis
                 }            
             }
             else{
+                $installcheck = Get-WmiObject -Class Win32_Product | where {$_.name -match "labtech"}
+                if ([bool]$installcheck){
+                    $installstate = "Server Address not found"
+                }
+                else{
+                    $installstate = "Labtech Agent not installed"
+                }
                 $tempobj = @{
                     Computername = $env:COMPUTERNAME
-                    ServerAddress = "Server Address not found"
+                    ServerAddress = "$installstate"
                 }
             }
             $ExportObj = New-Object -TypeName psobject -Property $tempobj
             $ExportObj
 
-        } | Select-Object Computername,ServerAddress |Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
+        } | Select-Object Computername,ServerAddress #|Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
+        if ($report){
+            $agentissues = $agentlist | where {$_.serveraddress -ne $ServerAddr}
+            if ([bool]$agentissues){
+                $agentissues | Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
+                $b = $agentissues | ConvertTo-Html -Fragment -PreContent "<h2>LTAgent Issues:</h2>" | Out-String
+                $css = "https://incaretechnologies.com/css/incare.css"
+                $precontent = "<img class='inc-logo' src='https://incaretechnologies.com/wp-content/uploads/InCare_Technologies_horizontal-NEW-NoCross-OUTLINES-for-Web.png'/><H1>$ClientName</H1>"
+                $HTMLScratch = ConvertTo-Html -Title "InCare Agent Issues" -Head $precontent -CssUri $css -Body $b -PostContent "<H5><i>$(get-date)</i></H5>"
+                $Body = $HTMLScratch | Out-String
+                $MailMessage = @{ 
+                    To = "$email"
+                    From = "incare.analysis@incare360.com" 
+                    Subject = "InCare Agent Report From $ClientName" 
+                    Body = "$body"
+                    BodyAsHTML = $True
+                    Smtpserver = "notify.incare360.net"
+                    Credential = $credentials
+                    Attachments = "$LogDir\Get_LTAddr_Log.csv"
+                }
+                Send-MailMessage @MailMessage
+            }
+        }
+        else{
+            $agentlist | Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
+        }
     }
     End{
         #($NWRM.name).tostring | Export-Csv -Path $LogDir\NoPSComps.csv -NoTypeInformation
-        $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
         Remove-Item -Path $LogDir\WRMComp.xml
         Remove-Item -Path $LogDir\NOWRM.xml
         Remove-Job -Name Verify -ErrorAction SilentlyContinue
-        Rename-Item -Path $LogDir\Get_LTAddr_Log.csv -NewName Get_LTAddr_Log_$FTimeStamp.csv
+        if ($report){
+            Remove-Item -Path $LogDir\Get_LTAddr_Log.csv -ErrorAction SilentlyContinue
+        }
+        else{
+            $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
+            Rename-Item -Path $LogDir\Get_LTAddr_Log.csv -NewName Get_LTAddr_Log_$FTimeStamp.csv
+        }
 
     }
 }
@@ -1276,4 +1326,20 @@ synopsis
     }
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd
+function Protect-Creds {
+<# Synopsis
+#>
+    [cmdletbinding()]
+        param(
+                    
+            [parameter(mandatory=$true)]
+            [string]$logdir
+
+        )
+        $credentials = Get-Credential
+        $credentials | Export-Clixml "$logdir\incare.xml"
+        #$credentials.password | ConvertFrom-SecureString | set-content "$logdir\incarep.txt"
+        #$credentials.username | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$logdir\incareu.txt"
+}
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds
