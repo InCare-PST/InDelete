@@ -1,5 +1,4 @@
-<#Created by Brandon Bristow#>﻿
-function Get-DomainAVStatus{
+﻿function Get-DomainAVStatus{
 <#
 #>
     [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -8,12 +7,12 @@ function Get-DomainAVStatus{
     Import-Module ActiveDirectory
     $date = (get-date).AddDays(-60)
     $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
-    $TotalServers = $computers | where operatingsystem -Match server
+    $TotalServers = $computers | where operatingsystem -Match server    
     $TotalWorkstations = $computers | where operatingsystem -NotMatch server
         ForEach ($comp in $computers) {
             if (Test-Connection -ComputerName $comp.name -Count 1 -Quiet) {
                 $OnlineComputers += $comp
-            }
+            }                    
         }
     $workstations = $OnlineComputers | where operatingsystem -NotMatch server
     $servers = $OnlineComputers | where operatingsystem -Match server
@@ -37,19 +36,19 @@ function Get-DomainAVStatus{
                     }
         $ComputerAVList = foreach ($avfound in $CompAVs){
             switch ($avfound.productstate){
-                "262144" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Disabled"}
-                "262160" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"}
-                "266240" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Enabled"}
-                "266256" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"}
-                "393216" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Disabled"}
-                "393232" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"}
-                "393488" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"}
-                "397312" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Enabled"}
-                "397328" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"}
-                "397584" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"}
+                "262144" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Disabled"} 
+                "262160" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"} 
+                "266240" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Enabled"} 
+                "266256" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"} 
+                "393216" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Disabled"} 
+                "393232" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"} 
+                "393488" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Disabled"} 
+                "397312" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Enabled"} 
+                "397328" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"} 
+                "397584" {$UpdateStatus = "Out of date" ;$RealTimeProtectionStatus = "Enabled"} 
                 "397568" {$UpdateStatus = "Up to date"; $RealTimeProtectionStatus = "Enabled"}
                 "393472" {$UpdateStatus = "Up to date" ;$RealTimeProtectionStatus = "Disabled"}
-                default {$UpdateStatus = "Unknown" ;$RealTimeProtectionStatus = "Unknown"}
+                default {$UpdateStatus = "Unknown" ;$RealTimeProtectionStatus = "Unknown"} 
             }
             $Temphash = @{
                 ComputerName = $computer.name
@@ -78,7 +77,7 @@ function Get-DomainAVStatus{
                             'Drive'=$drive.name;
                             'Size(GB)'=$size;
                             'Freespace(GB)'=$freespace;
-                            'Used Space(GB)'=[math]::round(($size - $freespace),2)
+                            'Used Space(GB)'=[math]::round(($size - $freespace),2) 
                         }
                         $obj = New-Object -TypeName psobject -Property $props
                         $ServerDriveSpace += $obj
@@ -118,10 +117,10 @@ function Get-DomainAVStatus{
     $login = "incaresales"
     $password = "Coffeeis4Clos3rz!@!@" | Convertto-SecureString -AsPlainText -Force
     $credentials = New-Object System.Management.Automation.Pscredential -Argumentlist $login,$password
-    $MailMessage = @{
-        To = "bbristow@incare360.com"
-        From = "incare.analysis@incare360.com"
-        Subject = "InCare Audit for $ClientName"
+    $MailMessage = @{ 
+        To = "support@incaretechnologies.com"
+        From = "incare.analysis@incare360.com" 
+        Subject = "InCare Audit for $ClientName" 
         Body = "$body"
         BodyAsHTML = $True
         Smtpserver = "notify.incare360.net"
