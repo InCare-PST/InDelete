@@ -1,4 +1,5 @@
-.#Script to get Domain Information 
+<#Script to get Domain Information for IVP
+#>
 function Get-DomainAVStatus{
 <#
 #>
