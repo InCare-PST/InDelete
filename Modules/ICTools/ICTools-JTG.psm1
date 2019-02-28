@@ -1341,15 +1341,17 @@ function Protect-Creds {
         #$credentials.password | ConvertFrom-SecureString | set-content "$logdir\incarep.txt"
         #$credentials.username | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$logdir\incareu.txt"
 }
+
 function Get-InstalledSoftware {
 <#
 Synopsis Get List of Installed Software JTG
 #>
 [cmdletbinding()]
     param(
-        [string]$Export,
-        [string]$Display,
-        [string]$Path="C:\temp"
+        [switch]$Export,
+        [switch]$Display,
+        [string]$Path="C:\temp",
+        [switch]$Showall
         )
 
 
@@ -1370,8 +1372,8 @@ foreach($pc in $computers){
     $regkey=$reg.OpenSubKey($UninstallKey)
     $subkeys=$regkey.GetSubKeyNames()
       foreach($key in $subkeys){
-          $thisKey=$UninstallKey+”\\”+$key
-          $thisSubKey=$reg.OpenSubKey($thisKey)
+        $thisKey=$UninstallKey+”\\”+$key
+        $thisSubKey=$reg.OpenSubKey($thisKey)
 
           $obj = New-Object PSObject
           $obj | Add-Member -MemberType NoteProperty -Name “ComputerName” -Value $pc
@@ -1380,6 +1382,7 @@ foreach($pc in $computers){
           $obj | Add-Member -MemberType NoteProperty -Name “InstallLocation” -Value $($thisSubKey.GetValue(“InstallLocation”))
           $obj | Add-Member -MemberType NoteProperty -Name “Publisher” -Value $($thisSubKey.GetValue(“Publisher”))
           $obj | Add-Member -MemberType NoteProperty -Name "InstanceId" -Value $($thisSubKey.GetValue("InstanceId"))
+          $obj | Add-Member -MemberType NoteProperty -Name "SystemComponent" -Value $($thisSubKey.GetValue("SystemComponent"))
 
           $array += $obj
 
@@ -1388,13 +1391,19 @@ foreach($pc in $computers){
 }}
 End{
   if($Export){
-    Write-Verbose "Exporting to CSV..."
-    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | export-csv -path "$path\$filename"
+  Write-Host -ForegroundColor Green ("Exporting to CSV..." + "$path\$Filename")
+  if(!$Showall){
+  $array | Where { $_.DisplayName -and $_.SystemComponent -ne 1 } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId, InstallLocation, SystemComponent | export-csv -path "$path\$filename"
+  }else{
+  $array | Where { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId, InstallLocation, SystemComponent | export-csv -path "$path\$filename"
   }
+}
   if($Display){
-    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | ft -auto
+    if(!$showall){ $array | Where { $_.DisplayName -and $_.SystemComponent -ne 1 } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | ft -auto
+  }
+  else{ $array | Where { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId| ft -auto
   }
 }
 }
-
+}
 Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware
