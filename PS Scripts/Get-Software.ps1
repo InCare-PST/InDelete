@@ -1,3 +1,5 @@
+Import-Module ActiveDirectory
+$date = (get-date).AddDays(-60)
 $getcomputers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
 $computers = ($getcomputers | select -ExpandProperty Name)
 $array = @()

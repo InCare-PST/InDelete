@@ -4,78 +4,82 @@ Function Get-Software {
 
       param(
 
-      [string]$Time=90,
-
       [string]$Path="C:\temp",
 
       [switch]$Export,
 
-      [switch]$Disable,
+      [switch]$Display,
 
-      [switch]$IsEnabled,
+      #[switch]$IsEnabled,
 
-      [switch]$Move,
-
-      [string]$OU="*"
 
       )
 
 Begin{
-$getcomputers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
-$computers = ($getcomputers | select -ExpandProperty Name)
-$array = @()
-}
+
+  $getcomputers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
+  $computers = ($getcomputers | select -ExpandProperty Name)
+  $FileName = $Date.tostring("dd-MM-yyyy")+" "+"InactiveUsers.csv"
+  $array = @()
+
 Process{
-foreach($pc in $computers){
+  foreach($pc in $computers){
 
-    $computername=$pc.computername
+      $computername=$pc.computername
 
-    #Define the variable to hold the location of Currently Installed Programs
+      #Define the variable to hold the location of Currently Installed Programs
 
-    $UninstallKey=”SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall”
-    $CNKey="SYSTEM\\CurrentControlSet\\Control\\ComputerName"
+      $UninstallKey=”SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall”
 
-    #Create an instance of the Registry Object and open the HKLM base key
 
-    $reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey(‘LocalMachine’,$computername)
+      #Create an instance of the Registry Object and open the HKLM base key
 
-    #Drill down into the Uninstall key using the OpenSubKey Method
+      $reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey(‘LocalMachine’,$computername)
 
-    $regkey=$reg.OpenSubKey($UninstallKey)
+      #Drill down into the Uninstall key using the OpenSubKey Method
 
-    #Retrieve an array of string that contain all the subkey names
+      $regkey=$reg.OpenSubKey($UninstallKey)
 
-    $subkeys=$regkey.GetSubKeyNames()
+      #Retrieve an array of string that contain all the subkey names
 
-    #Open each Subkey and use GetValue Method to return the required values for each
+      $subkeys=$regkey.GetSubKeyNames()
 
-    foreach($key in $subkeys){
+      #Open each Subkey and use GetValue Method to return the required values for each
 
-        $thisKey=$UninstallKey+”\\”+$key
+      foreach($key in $subkeys){
 
-        $thisSubKey=$reg.OpenSubKey($thisKey)
+          $thisKey=$UninstallKey+”\\”+$key
 
-        $obj = New-Object PSObject
+          $thisSubKey=$reg.OpenSubKey($thisKey)
 
-        $obj | Add-Member -MemberType NoteProperty -Name “ComputerName” -Value $pc
+          $obj = New-Object PSObject
 
-        $obj | Add-Member -MemberType NoteProperty -Name “DisplayName” -Value $($thisSubKey.GetValue(“DisplayName”))
+          $obj | Add-Member -MemberType NoteProperty -Name “ComputerName” -Value $pc
 
-        $obj | Add-Member -MemberType NoteProperty -Name “DisplayVersion” -Value $($thisSubKey.GetValue(“DisplayVersion”))
+          $obj | Add-Member -MemberType NoteProperty -Name “DisplayName” -Value $($thisSubKey.GetValue(“DisplayName”))
 
-        $obj | Add-Member -MemberType NoteProperty -Name “InstallLocation” -Value $($thisSubKey.GetValue(“InstallLocation”))
+          $obj | Add-Member -MemberType NoteProperty -Name “DisplayVersion” -Value $($thisSubKey.GetValue(“DisplayVersion”))
 
-        $obj | Add-Member -MemberType NoteProperty -Name “Publisher” -Value $($thisSubKey.GetValue(“Publisher”))
+          $obj | Add-Member -MemberType NoteProperty -Name “InstallLocation” -Value $($thisSubKey.GetValue(“InstallLocation”))
 
-        $array += $obj
+          $obj | Add-Member -MemberType NoteProperty -Name “Publisher” -Value $($thisSubKey.GetValue(“Publisher”))
 
-    }
+          $obj | Add-Member -MemberType NoteProperty -Name "InstanceId" -Value $($thisSubKey.GetValue("InstanceId"))
 
+          $array += $obj
+
+      }
+
+  }
+}
+End{
+  if($Export){
+    Write-Verbose "Exporting to CSV..."
+    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | export-csv -path "$path\$filename"
+  }
+  if($Display){
+    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId
+  }
 }
 
-#$array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher | ft -auto
-#$array | export-csv c:\temp\export.csv -append -force
-}
-}
-}
-Get-Software 
+Export-ModuleMember -Function Get-Software
