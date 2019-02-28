@@ -1,4 +1,4 @@
-﻿Function Get-InactiveUsers {
+Function Get-InactiveUsers {
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
 .DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
@@ -1349,7 +1349,8 @@ Synopsis Get List of Installed Software JTG
     param(
         [string]$Export,
         [string]$Display,
-        [string]$Path = "C:\temp",
+        [string]$Path="C:\temp"
+        )
 
 
 Begin{
@@ -1391,8 +1392,9 @@ End{
     $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | export-csv -path "$path\$filename"
   }
   if($Display){
-    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId
+    $array | Where-Object { $_.DisplayName } | select ComputerName, DisplayName, DisplayVersion, Publisher, InstanceId | ft -auto
   }
+}
 }
 
 Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware
