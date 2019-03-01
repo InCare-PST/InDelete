@@ -1,4 +1,4 @@
-Function Get-InactiveUsers {
+﻿Function Get-InactiveUsers {
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
 .DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
@@ -645,7 +645,7 @@ Synopsis
                                 write-host "$Serversn Windows Directory does not have emotet files"
                                 }
                             }
-                    $timestamp = (Get-Date -Format "œddMMyyyy hh-mm-ss")
+                    $timestamp = (Get-Date -Format “ddMMyyyy hh-mm-ss”)
                     $deletedfiles | Select-Object Name,Directory,CreationDate,Deleted,ComputerName,TimeStamp | Export-Csv -Path .\Deleted-Emotet-Legacy-Files-$timestamp.csv -NoTypeInformation
             }
 }
@@ -1341,6 +1341,7 @@ function Protect-Creds {
         #$credentials.password | ConvertFrom-SecureString | set-content "$logdir\incarep.txt"
         #$credentials.username | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$logdir\incareu.txt"
 }
+
 function Get-InstalledSoftware {
 <#
 Synopsis Get List of Installed Software JTG
@@ -1406,4 +1407,42 @@ End{
 }
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware
+
+Function Update-ICTools {
+<# This is to update ICTools and place in Modules Directory #>
+BEGIN{
+
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-JTG.psm1"
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+    $psptest = Test-Path $Profile
+    $psp = New-Item –Path $Profile –Type File –Force
+    $file = "$ictpath\ICTools.psm1"
+    $bakfile = "$ictpath\ICtools.bak"
+    $temp = "$ictpath\ICTools.temp.psm1"
+    $webclient = New-Object System.Net.WebClient
+}
+Process{
+#Make Directories
+
+if(!(Test-Path -Path $ictpath)){New-Item -Path $ictpath -Type Directory -Force}
+if(!$psptest){$psp}
+#if(!(Test-Path -Path $archive)){New-Item -Path $archive}
+
+if($bakfile){Remove-Item -Path $bakfile -Force}
+if($file){Rename-Item -Path $file -NewName $bakfile -Force}
+
+$webclient.downloadfile($url, $file)
+}
+End{
+#Planned for Version number check to temp and only update if not latest version
+write-host -ForegroundColor Green("Reloading Powershell to access updated module")
+start-sleep -seconds 3
+start-process PowerShell
+stop-process -Id $PID
+}
+
+#End of Function
+}
+
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware,Update-ICTools
