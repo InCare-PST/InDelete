@@ -1440,9 +1440,19 @@ start-sleep -seconds 3
 start-process PowerShell
 stop-process -Id $PID
 }
-
 #End of Function
 }
 
+Function Install-PSExec {
+<# This is to Install PSExec #>
+    $url = "https://live.sysinternals.com/psexec.exe"
+    $syspath = "$env:windir\System32\psexec.exe"
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware,Update-ICTools
+if(!(test-path -Path $syspath)){
+Import-Module BITSTransfer
+Start-BitsTransfer -Source $url -Destination $syspath
+}
+#End of Function
+}
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware,Update-ICTools,Install-PSExec
