@@ -645,7 +645,7 @@ Synopsis
                                 write-host "$Serversn Windows Directory does not have emotet files"
                                 }
                             }
-                    $timestamp = (Get-Date -Format “ddMMyyyy hh-mm-ss”)
+                    $timestamp = (Get-Date -Format "œddMMyyyy hh-mm-ss")
                     $deletedfiles | Select-Object Name,Directory,CreationDate,Deleted,ComputerName,TimeStamp | Export-Csv -Path .\Deleted-Emotet-Legacy-Files-$timestamp.csv -NoTypeInformation
             }
 }
@@ -1405,4 +1405,5 @@ End{
 }
 }
 }
+
 Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Get-InstalledSoftware
