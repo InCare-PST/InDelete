@@ -1341,7 +1341,6 @@ function Protect-Creds {
         #$credentials.password | ConvertFrom-SecureString | set-content "$logdir\incarep.txt"
         #$credentials.username | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$logdir\incareu.txt"
 }
-
 function Get-InstalledSoftware {
 <#
 Synopsis Get List of Installed Software JTG
