@@ -1428,8 +1428,8 @@ if(!(Test-Path -Path $ictpath)){New-Item -Path $ictpath -Type Directory -Force}
 if(!$psptest){$psp}
 #if(!(Test-Path -Path $archive)){New-Item -Path $archive}
 
-if($bakfile){Remove-Item -Path $bakfile -Force}
-if($file){Rename-Item -Path $file -NewName $bakfile -Force}
+if(Test-Path -Path $bakfile){Remove-Item -Path $bakfile -Force}
+if(Test-Path -Path $file){Rename-Item -Path $file -NewName $bakfile -Force}
 
 $webclient.downloadfile($url, $file)
 }
