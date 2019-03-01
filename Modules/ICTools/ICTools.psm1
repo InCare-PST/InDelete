@@ -1412,7 +1412,7 @@ Function Update-ICTools {
 <# This is to update ICTools and place in Modules Directory #>
 BEGIN{
 
-    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-JTG.psm1"
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
     $psptest = Test-Path $Profile
     $psp = New-Item –Path $Profile –Type File –Force
