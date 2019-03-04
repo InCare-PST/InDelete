@@ -1424,7 +1424,7 @@ End{
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
 Get-History | Export-Csv $ictpath\history.csv -Append
-if(!($NoRestart){
+if(!$NoRestart){
 start-process PowerShell
 stop-process -Id $PID
 }
