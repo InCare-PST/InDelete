@@ -1437,6 +1437,18 @@ if($NoRestart){
 #End of Function
 }
 
+Function Import-ICTHistory {
+<# This is to Install PSExec #>
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+
+if(Test-Path -Path $ictpath\history.csv){
+  Import-Csv $ictpath\history.csv | Add-History
+}else{
+  Write-Host "No History to Import"
+}
+#End of Function
+}
+
 Function Install-PSExec {
 <# This is to Install PSExec #>
     $url = "https://live.sysinternals.com/psexec.exe"
@@ -1449,5 +1461,4 @@ Start-BitsTransfer -Source $url -Destination $syspath
 #End of Function
 }
 
-
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory
