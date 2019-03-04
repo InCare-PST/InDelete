@@ -1392,6 +1392,10 @@ function Protect-Creds {
 
 Function Update-ICTools {
 <# This is to update ICTools and place in Modules Directory #>
+[cmdletbinding()]
+    param(
+        [switch]$NoRestart
+      )
 BEGIN{
 
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
@@ -1419,8 +1423,11 @@ End{
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
+Get-History | Export-Csv $ictpath\history.csv -Append
+if(!($NoRestart){
 start-process PowerShell
 stop-process -Id $PID
+}
 }
 #End of Function
 }
