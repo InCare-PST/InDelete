@@ -1,7 +1,7 @@
 ﻿Function Get-InactiveUsers {
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
-.DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them 
+.DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
             to file, disabling them, moving them, or any combination.
 .PARAMETER Time
 .PARAMETER Path
@@ -14,7 +14,7 @@
 .EXAMPLE
 #>
     [cmdletbinding(SupportsShouldProcess=$True)]
-        
+
         param(
 
         [string]$Time=90,
@@ -62,7 +62,7 @@
                 }
             }
             else {
-                $InactivePresort = Get-ADUser -Filter {LastLogonTimeStamp -lt $Period -and enabled -eq $true} -Properties LastLogonTimeStamp 
+                $InactivePresort = Get-ADUser -Filter {LastLogonTimeStamp -lt $Period -and enabled -eq $true} -Properties LastLogonTimeStamp
                 $Inactive = $InactivePresort | select-object Name,SamAccountName,@{Name="Last Logon Time"; Expression={[DateTime]::FromFileTime($_.lastLogonTimestamp).ToString('yyyy-MM-dd_hh:mm:ss')}} | Sort-Object Name
                 if ($Export) {
                     Write-Verbose "Exporting to CSV"
@@ -78,13 +78,13 @@
                     $ORG = $ORGU | Out-GridView -Title "Please Choose the Target OU" -OutputMode Single
                 }
                 else {
-                    $ORG = $ORGU                
+                    $ORG = $ORGU
                 }
-                $InactivePresort | Move-ADObject -TargetPath $ORG.Distinguishedname                
+                $InactivePresort | Move-ADObject -TargetPath $ORG.Distinguishedname
             }
             if($Disable) {
                 $InactivePresort | Disable-ADAccount
-                
+
             }
         }
         End{
@@ -109,8 +109,8 @@ Synopsis
             [string]$LogDir = "C:\Temp",
 
             [int32]$LastLogon = "60",
-            
-            [switch]$UseList            
+
+            [switch]$UseList
         )
     Begin{
         $RunTimeLoop = (Get-Date).AddHours($RunTime)
@@ -143,7 +143,7 @@ Synopsis
                     else {
                         Start-Sleep -Seconds 10
                     }
-                } 
+                }
             }
         #Start-Job -Name LegacyJob -ScriptBlock {Remove-EmotetLegacy -ComputerName ($NWRM.name) -LogDir $LogDir -Logonly $LogOnly}
         $looptime = (Get-Date).AddHours($RunTime)
@@ -153,7 +153,7 @@ Synopsis
                 }
                 $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
                 #$ScanTime = (Get-Date).ToString('yyyy-MM-dd')
-                if (Test-Path "$LogDir\exclude32.txt") {   
+                if (Test-Path "$LogDir\exclude32.txt") {
                     $exclude32 = Get-Content -Path $LogDir\exclude32.txt
                 }
                 if (Test-Path "$LogDir\exclude64.txt") {
@@ -167,7 +167,7 @@ Synopsis
                     $deletedfiles = @()
                     $ComputerName = $env:COMPUTERNAME
                     if (Test-Path -Path "C:\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path C:\windows\syswow64 *.exe | where {$_.creationtime -ge (get-date).AddDays(-3) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
+                        $file = Get-ChildItem -Path C:\windows\syswow64 *.exe | where {$_.creationtime -ge (get-date).AddDays(-3) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -178,7 +178,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -218,7 +218,7 @@ Synopsis
                             }
                     }
                     if (!(Test-Path -Path "C:\windows\SysWOW64")) {
-                        $file = Get-ChildItem -Path C:\windows\system32 *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
+                        $file = Get-ChildItem -Path C:\windows\system32 *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -229,7 +229,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -279,7 +279,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -329,7 +329,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -379,7 +379,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -431,7 +431,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }#>
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -486,7 +486,7 @@ Synopsis
                 Remove-Job -Name Verify -ErrorAction SilentlyContinue
             }
             if ($job.name -eq "LegacyJob" -and $job.State -eq "Running"){
-                Stop-Job -Name LegacyJob -ErrorAction SilentlyContinue            
+                Stop-Job -Name LegacyJob -ErrorAction SilentlyContinue
                 Remove-Job -Name LegacyJob -ErrorAction SilentlyContinue
             }
         }
@@ -518,7 +518,7 @@ Synopsis
                     $serversn = $Computer.name
                     Start-Job {Start-Process $Logdir\psexec.exe -ArgumentList "\\$serversn -s winrm.cmd quickconfig -q" -NoNewWindow}
                     if (Test-Path -Path "\\$serversn\c$\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -527,7 +527,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -561,7 +561,7 @@ Synopsis
                         }
                     }
                     if (!(Test-Path -Path "\\$serversn\c$\SysWOW64")) {
-                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -570,7 +570,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -612,7 +612,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -668,8 +668,8 @@ Synopsis
             [string]$LogDir = "C:\Temp",
 
             [int32]$LastLogon = "60",
-            
-            [switch]$UseList            
+
+            [switch]$UseList
         )
     Begin{
         $RunTimeLoop = (Get-Date).AddHours($RunTime)
@@ -716,7 +716,7 @@ Synopsis
                     $looptime = (Get-Date)
                 }
                 $ScanTime = (Get-Date).ToString('yyyy-MM-dd')
-                if (Test-Path "$LogDir\exclude32.txt") {   
+                if (Test-Path "$LogDir\exclude32.txt") {
                     $exclude32 = Get-Content -Path $LogDir\exclude32.txt
                 }
                 if (Test-Path "$LogDir\exclude64.txt") {
@@ -730,7 +730,7 @@ Synopsis
                     $deletedfiles = @()
                     $ComputerName = $env:COMPUTERNAME
                     <#if (Test-Path -Path "C:\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64} 
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -740,7 +740,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -777,7 +777,7 @@ Synopsis
                         }
                     }
                     if (!(Test-Path -Path "C:\windows\SysWOW64")) {
-                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32} 
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -787,7 +787,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                     }
                                         #Start-Sleep -Seconds 3
@@ -833,7 +833,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -879,7 +879,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -925,7 +925,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }
                                         #Start-Sleep -Seconds 3
                                         try {
@@ -973,7 +973,7 @@ Synopsis
                                             Stop-Process -Name $bfile.basename -Force -ErrorAction SilentlyContinue
                                         }
                                         catch{
-                            
+
                                         }#>
                                         #Start-Sleep -Seconds 3
                                         <#try {
@@ -1034,11 +1034,11 @@ Synopsis
         param(
 
             $RunTime = 24,
-            
+
             [string]$LogDir = "c:\temp",
 
             [int32]$LastLogon = 60,
-            
+
             [switch]$LogOnly,
 
             [switch]$RunOnce
@@ -1073,7 +1073,7 @@ Synopsis
                     OperatingSystem = $OperatingSystem
                 }
                 $obj = New-Object -TypeName psobject -Property $tempobj
-                $obj | select Name,LastLogonDate,PsRemoting,OperatingSystem,DistinguishedName                    
+                $obj | select Name,LastLogonDate,PsRemoting,OperatingSystem,DistinguishedName
             }
         }
     }
@@ -1137,7 +1137,7 @@ function Add-DHCPv4Reservation {
         param(
         [parameter(Mandatory=$true)]
         [string]$CSVPath,
-        
+
         [parameter(Mandatory=$true)]
         [string]$ScopeID
 
@@ -1218,7 +1218,7 @@ synopsis
                 $tempobj = @{
                     Computername = $env:COMPUTERNAME
                     ServerAddress = $serveraddress
-                }            
+                }
             }
             else{
                 $installcheck = Get-WmiObject -Class Win32_Product | where {$_.name -match "labtech"}
@@ -1246,10 +1246,10 @@ synopsis
                 $precontent = "<img class='inc-logo' src='https://incaretechnologies.com/wp-content/uploads/InCare_Technologies_horizontal-NEW-NoCross-OUTLINES-for-Web.png'/><H1>$ClientName</H1>"
                 $HTMLScratch = ConvertTo-Html -Title "InCare Agent Issues" -Head $precontent -CssUri $css -Body $b -PostContent "<H5><i>$(get-date)</i></H5>"
                 $Body = $HTMLScratch | Out-String
-                $MailMessage = @{ 
+                $MailMessage = @{
                     To = "$email"
-                    From = "incare.analysis@incare360.com" 
-                    Subject = "InCare Agent Report From $ClientName" 
+                    From = "incare.analysis@incare360.com"
+                    Subject = "InCare Agent Report From $ClientName"
                     Body = "$body"
                     BodyAsHTML = $True
                     Smtpserver = "notify.incare360.net"
@@ -1286,7 +1286,7 @@ synopsis
 
     [cmdletbinding()]
         param(
-            
+
             [string[]]$ComputerName,
 
             [string]$Logdir = "C:\temp",
@@ -1312,7 +1312,7 @@ synopsis
                     $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
                     $ComputerName = $WRMComp.Name
                     Receive-Job -Name Verify
-                    $waiting = $false                    
+                    $waiting = $false
                 }
                 else{
                     Start-Sleep -Seconds 5
@@ -1358,7 +1358,7 @@ synopsis
                 $RegObj = New-Object -TypeName psobject -Property $tempobj
                 $RegObj
             } | Select-Object "ComputerName","Initial Registry Entry","Key Changed" | Export-Csv -Path $LogDir\Set_LTAddr_Log.csv -Append -Force -NoTypeInformation
-        #} 
+        #}
         <#Catch{
             Write-Host "Could not connect to $ComputerName"
         }#>
@@ -1379,7 +1379,7 @@ function Protect-Creds {
 #>
     [cmdletbinding()]
         param(
-                    
+
             [parameter(mandatory=$true)]
             [string]$logdir
 
@@ -1390,4 +1390,52 @@ function Protect-Creds {
         #$credentials.username | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$logdir\incareu.txt"
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds
+Function Update-ICTools {
+<# This is to update ICTools and place in Modules Directory #>
+BEGIN{
+
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+    $psptest = Test-Path $Profile
+    $psp = New-Item –Path $Profile –Type File –Force
+    $file = "$ictpath\ICTools.psm1"
+    $bakfile = "$ictpath\ICtools.bak"
+    $temp = "$ictpath\ICTools.temp.psm1"
+    $webclient = New-Object System.Net.WebClient
+}
+Process{
+#Make Directories
+
+if(!(Test-Path -Path $ictpath)){New-Item -Path $ictpath -Type Directory -Force}
+if(!$psptest){$psp}
+#if(!(Test-Path -Path $archive)){New-Item -Path $archive}
+
+if(Test-Path -Path $bakfile){Remove-Item -Path $bakfile -Force}
+if(Test-Path -Path $file){Rename-Item -Path $file -NewName $bakfile -Force}
+
+$webclient.downloadfile($url, $file)
+}
+End{
+#Planned for Version number check to temp and only update if not latest version
+write-host -ForegroundColor Green("Reloading Powershell to access updated module")
+start-sleep -seconds 3
+start-process PowerShell
+stop-process -Id $PID
+}
+#End of Function
+}
+
+Function Install-PSExec {
+<# This is to Install PSExec #>
+    $url = "https://live.sysinternals.com/psexec.exe"
+    $syspath = "$env:windir\System32\psexec.exe"
+
+if(!(test-path -Path $syspath)){
+Import-Module BITSTransfer
+Start-BitsTransfer -Source $url -Destination $syspath
+}
+#End of Function
+}
+
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec
