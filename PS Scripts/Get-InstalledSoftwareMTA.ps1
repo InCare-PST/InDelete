@@ -9,8 +9,6 @@ $scriptblock = {
         $comp
             )
 
-
-    Begin{
     $computers = ($getcomputers | select -ExpandProperty Name)
     $FileName = $Date.tostring("dd-MM-yyyy")+" "+"SoftwareList.csv"
     $array = @()
@@ -34,6 +32,7 @@ $scriptblock = {
 
               $array += $obj
 
+        }
         }
 
 foreach($comp in $computers) {
