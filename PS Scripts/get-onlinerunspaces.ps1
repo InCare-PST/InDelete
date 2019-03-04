@@ -1,12 +1,16 @@
-﻿$date = (get-date).AddDays(-60)
+﻿$LogDir = "C:\Temp"
+$LastLogon = 60
+$date = (get-date).AddDays(-$LastLogon)
 $computers = Get-ADComputer -Filter * -Properties LastLogonDate | where lastlogondate -GE $date
-$pool = [RunspaceFactory]::CreateRunspacePool(1, [int]$env:NUMBER_OF_PROCESSORS + 1000)
+$pool = [RunspaceFactory]::CreateRunspacePool(1, [int]$env:NUMBER_OF_PROCESSORS + 100)
 $pool.ApartmentState = "MTA"
 $pool.Open()
 $runspaces = @()
 $scriptblock = {
     Param(
-        $Comp
+        $Comp,
+        $DistinguishedName,
+        $LastLogonDate
     )
     if (Test-Connection -ComputerName $comp -Count 1 -Quiet) {
         $Alive = "Yes"
@@ -18,18 +22,24 @@ $scriptblock = {
         }
         $tempobj = @{
             Name = $Comp
+            DistinguishedName = $DistinguishedName
+            LastLogonDate = $LastLogonDate
             PsRemoting = $WSMAN
         }
+        $obj = New-Object -TypeName psobject -Property $tempobj
+        $obj | select Name,DistinguishedName,LastLogonDate,PsRemoting                    
     }
-    $obj = New-Object -TypeName psobject -Property $tempobj
-    $obj | select Name,PsRemoting
 }
 
 foreach($comp in $computers) {
-    #Write-host "$comp temp"
+    $paramlist = @{
+        Comp = $comp.name
+        DistinguishedName = $comp.DistinguishedName
+        LastLogonDate = $comp.LastLogonDate
+    }
     $runspace = [PowerShell]::Create()
     $null = $runspace.AddScript($scriptblock)
-    $null = $runspace.AddArgument($comp.name)
+    $null = $runspace.AddParameters($paramlist)
     $runspace.RunspacePool = $pool
     $runspaces += [PSCustomObject]@{ Pipe = $runspace; Status = $runspace.BeginInvoke() }
 }
@@ -48,6 +58,11 @@ $PsRemotingDisabled = $onlinecomps.where({$_.PsRemoting -eq "Disabled"})
 Write-Output "$($onlinecomps.count) have been detected online"
 Write-Output "$($PsRemotingEnabled.count) are responding via PSRemote"
 Write-Output "$($PsRemotingDisabled.count) need to have PSRemoting enabled or addressed"
+$PsRemotingEnabled | Export-Clixml $LogDir\WRMComp.xml
+$PsRemotingDisabled | Export-Clixml $LogDir\NOWRM.xml
+$FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
+$PsRemotingDisabled | Select-Object Name,DistinguishedName,LastLogonDate | Export-Csv $LogDir\NoPSRemoting_$FTimeStamp.csv -Append -NoTypeInformation
+
 
 $pool.Close()
 $pool.Dispose()
