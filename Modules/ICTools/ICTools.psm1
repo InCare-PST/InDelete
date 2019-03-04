@@ -1423,6 +1423,7 @@ End{
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
+start-sleep -seconds 3
 Get-History | Export-Csv $ictpath\history.csv -Append
 
 if($NoRestart){
