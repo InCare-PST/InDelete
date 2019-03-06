@@ -1468,10 +1468,10 @@ $regpath = HKLM:\SOFTWARE\Microsoft\WcmSvc
 $regkey = IgnoreNonRoutableEthernet
 
 if(!(test-path $regpath)){
-  [Void]New-Item -Path $regpath -Force
-  [Void]New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force
+  New-Item -Path $regpath -Force | Out-Null
+  New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force | Out-Null
 }else{
-  [Void]New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force
+  New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force | Out-Null
 }
 
 #End function
