@@ -1391,12 +1391,12 @@ function Protect-Creds {
 }
 
 Function Update-ICTools {
-<# This is to update ICTools and place in Modules Directory #>
-[cmdletbinding()]
+    [cmdletbinding()]
     param(
         [switch]$NoRestart
       )
-BEGIN{
+
+Begin{
 
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
@@ -1423,19 +1423,20 @@ End{
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
-start-sleep -seconds 3
-Get-History | Export-Csv $ictpath\history.csv -Append
-}
+
 
 if($NoRestart){
-  Import-Module ICTools
-  Remove-Module ICTools
-  Import-Module ICTools
-}else{
-  start-process PowerShell
-  stop-process -Id $PID
+Import-Module ICTools
+Remove-Module ICTools
+Import-Module ICTools
 }
+else{
+start-process PowerShell
+stop-process -Id $PID
 }
+
+}
+
 #End of Function
 }
 
