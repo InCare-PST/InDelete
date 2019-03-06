@@ -1461,5 +1461,22 @@ Start-BitsTransfer -Source $url -Destination $syspath
 }
 #End of Function
 }
+Function Set-FixCellular {
+<# This is to correct the Windows 10 when Cellular is diconnected when ethernet plugged in #>
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory
+$regpath = HKLM:\SOFTWARE\Microsoft\WcmSvc
+$regkey = IgnoreNonRoutableEthernet
+
+if(!(test-path $regpath)){
+  [Void]New-Item -Path $regpath -Force
+  [Void]New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force
+}else{
+  [Void]New-ItemProperty -Path $regpath -Name $regkey -Value "1" -PropertyType DWORD -Force
+}
+
+#End function
+}
+
+
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular
