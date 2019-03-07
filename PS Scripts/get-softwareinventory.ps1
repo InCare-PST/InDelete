@@ -4,7 +4,7 @@
 #>
     [cmdletbinding()]
         param(
-        
+            $Email = "support@incaretechnologies.com"
         )
     begin{
         [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -99,16 +99,6 @@
             }
         }
         #Setup Message Criteria
-        $MailMessage = @{ 
-            To = "support@incaretechnologies.com"
-            From = "incare.analysis@incare360.com" 
-            Subject = "InCare Audit for $ClientName" 
-            Body = "$body"
-            BodyAsHTML = $True
-            Smtpserver = "notify.incare360.net"
-            Credential = $credentials
-            Attachments = ".\Servertotalspace.csv",".\ServerDriveSpace.csv",".\AVStatusList.csv"
-        }
     }
     process{
         $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
@@ -214,6 +204,16 @@
         $password = "Coffeeis4Clos3rz!@!@" | Convertto-SecureString -AsPlainText -Force
         $credentials = New-Object System.Management.Automation.Pscredential -Argumentlist $login,$password
         #Send Report
+        $MailMessage = @{ 
+            To = "$email"
+            From = "incare.analysis@incare360.com" 
+            Subject = "InCare Audit for $ClientName" 
+            Body = "$body"
+            BodyAsHTML = $True
+            Smtpserver = "notify.incare360.net"
+            Credential = $credentials
+            Attachments = ".\Servertotalspace.csv",".\ServerDriveSpace.csv",".\AVStatusList.csv"
+        }
         Send-MailMessage @MailMessage
 
     }
