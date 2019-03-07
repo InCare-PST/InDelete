@@ -1,4 +1,10 @@
-<# This is to update ICTools and place in Modules Directory #>
+<#
+DO NOT USE; THIS IS NOT READY AND WILL BREAK EVERYTHING!!!!
+
+This is to update ICTools and place in Modules Directory
+
+
+#>
 Function Update-ICTools {
 
 BEGIN{
@@ -31,7 +37,15 @@ start-sleep -seconds 3
 start-process PowerShell
 stop-process -Id $PID
 }
-
+#[Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
+#$ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+$releaseurl = "https://github.com/InCare-PST/ICTools/releases/latest"
+$Version = (Invoke-WebRequest $releaseurl -UseBasicParsing).links | Where {$_.Title -NotMatch "GitHub" -and $_.Title -GT "0"} | Select -Unique Title
+$ProjectUri = "https://github.com/InCare-PST/ICTools"
+$tempobj = (Get-Content -Path C:\Users\administrator.GILESMTG\Documents\WindowsPowerShell\Modules\ICTools\ICTools.psm1 -Tail 1).trim("Export-ModuleMember -Function")
+$cmdexports += $tempobj -split "," -join '" ,"'
+new-modulemanifest -Path $ictpath\ICTools.psd1 -CompanyName "InCare Technologies" -Author "ICT Team" -ModuleVersion $version.title -ProjectUri $ProjectUri -FunctionsToExport @("*")
+import-module ICTools
 #End of Function
 }
 Update-ICTools
