@@ -3,13 +3,13 @@ Function Update-ICTools {
 
 BEGIN{
 
-    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-JTG.psm1"
-    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-Beta.psm1"
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools Beta"
     $psptest = Test-Path $Profile
     $psp = New-Item –Path $Profile –Type File –Force
-    $file = "$ictpath\ICTools.psm1"
+    $file = "$ictpath\ICTools Beta.psm1"
     $bakfile = "$ictpath\ICtools.bak"
-    $temp = "$ictpath\ICTools.temp.psm1"
+    $temp = "$ictpath\ICTools Beta.temp.psm1"
     $webclient = New-Object System.Net.WebClient
 }
 Process{
