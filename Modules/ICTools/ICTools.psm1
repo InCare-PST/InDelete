@@ -1463,6 +1463,7 @@ Start-BitsTransfer -Source $url -Destination $syspath
 }
 #End of Function
 }
+
 Function Set-FixCellular {
 <# This is to correct the Windows 10 when Cellular is diconnected when ethernet plugged in #>
 
@@ -1478,7 +1479,5 @@ if(!(test-path $regpath)){
 
 #End function
 }
-
-
 
 Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular
