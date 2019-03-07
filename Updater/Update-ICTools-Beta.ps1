@@ -8,7 +8,7 @@ BEGIN{
     $psptest = Test-Path $Profile
     $psp = New-Item –Path $Profile –Type File –Force
     $file = "$ictpath\ICTools-Beta.psm1"
-    $bakfile = "$ictpath\ICtools.bak"
+    $bakfile = "$ictpath\ICtools-Beta.bak"
     $temp = "$ictpath\ICTools-Beta.temp.psm1"
     $webclient = New-Object System.Net.WebClient
 }
