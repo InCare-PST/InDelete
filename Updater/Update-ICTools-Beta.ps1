@@ -1,5 +1,5 @@
 <# This is to update ICTools and place in Modules Directory #>
-Function Update-ICTools {
+Function Update-ICToolsBeta {
 
 BEGIN{
 
@@ -34,4 +34,4 @@ stop-process -Id $PID
 
 #End of Function
 }
-Update-ICTools
+Update-ICToolsBeta
