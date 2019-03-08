@@ -1403,7 +1403,7 @@ Begin{
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools-Beta"
     $psptest = Test-Path $Profile
-    $psp = New-Item –Path $Profile –Type File –Force
+    $psp = New-Item -Path $Profile -Type File -Force
     $file = "$ictpath\ICTools-Beta.psm1"
     $bakfile = "$ictpath\ICtools-Beta.bak"
     $temp = "$ictpath\ICTools-Beta.temp.psm1"
@@ -1413,7 +1413,7 @@ Begin{
     #$Version = (Invoke-WebRequest $releaseurl -UseBasicParsing).links | Where {$_.Title -NotMatch "GitHub"} #-and $_.Title -GT "0"} | Select -Unique Title
     $company = "Incare Technologies"
     $Author = "InCare PST"
-    $version = (Get-Content $file -Head 1).trim('#VERSION=') 
+    $version = (Get-Content $file -Head 1).trim('#VERSION=')
 
 }
 Process{
@@ -1490,4 +1490,4 @@ if(!(test-path $regpath)){
 #End function
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICToolsBeta,Install-PSExec,Import-ICTHistory,Set-FixCellular
