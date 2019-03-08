@@ -1408,6 +1408,13 @@ Begin{
     $bakfile = "$ictpath\ICtools-Beta.bak"
     $temp = "$ictpath\ICTools-Beta.temp.psm1"
     $webclient = New-Object System.Net.WebClient
+    $manifest = "$ictpath\ICTools-Beta.psd1"
+    #$webclient = New-Object System.Net.WebClient
+    #$Version = (Invoke-WebRequest $releaseurl -UseBasicParsing).links | Where {$_.Title -NotMatch "GitHub"} #-and $_.Title -GT "0"} | Select -Unique Title
+    $company = "Incare Technologies"
+    $Author = "InCare PST"
+    $version = (Get-Content $file -Head 1).trim('#VERSION=') 
+
 }
 Process{
 #Make Directories
@@ -1422,10 +1429,11 @@ if(Test-Path -Path $file){Rename-Item -Path $file -NewName $bakfile -Force}
 $webclient.downloadfile($url, $file)
 }
 End{
+$version = $file 
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
-
+new-modulemanifest -Path $manifest -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri
 
 if($NoRestart){
 Import-Module ICTools-Beta
