@@ -1422,14 +1422,14 @@ Process{
 if(!(Test-Path -Path $ictpath)){New-Item -Path $ictpath -Type Directory -Force}
 if(!$psptest){$psp}
 #if(!(Test-Path -Path $archive)){New-Item -Path $archive}
-
+if(Test-Path -Path $manifest){Remove-Item -Path $manifest -Force}
 if(Test-Path -Path $bakfile){Remove-Item -Path $bakfile -Force}
 if(Test-Path -Path $file){Rename-Item -Path $file -NewName $bakfile -Force}
 
 $webclient.downloadfile($url, $file)
 }
 End{
-$version = $file 
+$version = $file
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
 start-sleep -seconds 3
