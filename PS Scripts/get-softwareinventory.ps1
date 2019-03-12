@@ -205,7 +205,7 @@
         $credentials = New-Object System.Management.Automation.Pscredential -Argumentlist $login,$password
         #Send Report
         $MailMessage = @{ 
-            To = "$email"
+            To = "$Email"
             From = "incare.analysis@incare360.com" 
             Subject = "InCare Audit for $ClientName" 
             Body = "$body"
