@@ -1467,11 +1467,21 @@ Function Install-PSExec {
 <# This is to Install PSExec #>
     $url = "https://live.sysinternals.com/psexec.exe"
     $syspath = "$env:windir\System32\psexec.exe"
-    [Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
-    
+
+
+
 if(!(test-path -Path $syspath)){
-Import-Module BITSTransfer
-Start-BitsTransfer -Source $url -Destination $syspath
+
+try{
+  Import-Module BITSTransfer
+  Start-BitsTransfer -Source $url -Destination $syspath -ErrorAction Stop
+}
+catch{
+  [Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
+  $webclient = New-Object System.Net.WebClient
+  $webclient.downloadfile($url, $syspath)
+
+}
 }
 #End of Function
 }
