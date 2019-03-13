@@ -1168,6 +1168,11 @@ synopsis
             [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
             [string]$ServerAddr = "https://cwa.incare360.com",
 
+            [Parameter(ParameterSetName="Default")]
+            [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
+            [ValidateSet("Servers", "Workstations", "List")]
+            [string]$Exclude,
+
             [Parameter(ParameterSetName="Reporting",Mandatory=$false)]
             [switch]$report,
 
@@ -1177,16 +1182,10 @@ synopsis
             [Parameter(ParameterSetName="Reporting",Mandatory=$true)]
             [string]$ClientName
 
-            #[Parameter(ParameterSetName="Reporting",Mandatory=$true)]
-            #[string]$UserName
-
         )
     Begin{
         if($report){
             $credentials = Import-Clixml -path "$logdir\incare.xml"
-            #$password = Get-Content "$logdir\incarep.txt" | ConvertTo-SecureString
-            #$Username = Get-Content "$logdir\incareu.txt" | ConvertTo-SecureString
-            #$credentials = New-Object System.Management.Automation.PsCredential($UserName,$password)
         }
         if(!(Test-Path $LogDir)){
             New-Item -Path $LogDir -ItemType Directory
@@ -1205,10 +1204,16 @@ synopsis
             }
             if ($VerifyJob.State -eq "Completed"){
                 $WRMComp = Import-Clixml -Path $LogDir\WRMComp.xml
-                $ComputerName = $WRMComp.name
+                #$ComputerName = $WRMComp.name
                 Receive-Job -Name Verify
                 $waiting = $false
             }
+        }
+        switch ($Exclude){
+            "Servers" {$ComputerName = ($WRMComp | where {$_.operatingsystem -notmatch "server"}).name}
+            "Workstations" {$ComputerName = ($WRMComp | where {$_.operatingsystem -match "server"}).name}
+            "List" {$ComputerName = $WRMComp.name;$Excludes = Import-Csv $LogDir\exclude.csv;foreach ($ex in $Excludes.name){$ComputerName = $ComputerName | where {$_ -notmatch $ex}} }
+            default {$ComputerName = $WRMComp.name}
         }
     }
     Process{
