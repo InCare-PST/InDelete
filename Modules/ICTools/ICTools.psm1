@@ -1157,7 +1157,11 @@ function Add-DHCPv4Reservation {
 function Get-LTServerAdd {
 <#
 .SYNOPSIS This command is for checking online domain computers for the proper labtech reporting server setting and returning that information.
-.DESCRIPTION 
+.DESCRIPTION Checks a registry key in the labtech hive to see if the server has been properly configured for the Labtech agent. It reports back
+on the setting and if labtech was actually installed. It can also be set to email reports
+.PARAMETER LogDir This parameter sets the working dirctory for the command. The default is C:\temp
+.PARAMETER ServerAddr This parameter specifies the correct server address for the Labtech reporting server. Currently set to "https://cwa.incare360.com" by default
+.PARAMETER Exclude Specifies if certain computers should be excluded from the scan. 
 #>
     [cmdletbinding(DefaultParameterSetName="Default")]
         param(
