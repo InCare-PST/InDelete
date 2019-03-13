@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 <# THIS BETA VERSION IS FOR TESTING ONLY!!!! #>
 
 
 Function Get-InactiveUsers {
-=======
-﻿Function Get-InactiveUsers {
->>>>>>> 29203036b73a7981cd3420d3a402664006e822c5
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
 .DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
