@@ -1156,7 +1156,8 @@ function Add-DHCPv4Reservation {
 
 function Get-LTServerAdd {
 <#
-synopsis
+.SYNOPSIS This command is for checking online domain computers for the proper labtech reporting server setting and returning that information.
+.DESCRIPTION 
 #>
     [cmdletbinding(DefaultParameterSetName="Default")]
         param(
