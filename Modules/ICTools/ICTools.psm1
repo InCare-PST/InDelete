@@ -1393,19 +1393,32 @@ function Protect-Creds {
 Function Update-ICTools {
     [cmdletbinding()]
     param(
-        [switch]$NoRestart
+        [switch]$NoRestart,
+        [switch]$Beta
       )
+
 
 Begin{
 
+if($Beta){
+  #Beta Variables
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-Beta.psm1"
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools-Beta"
+    $file = "$ictpath\ICTools-Beta.psm1"
+    $bakfile = "$ictpath\ICtools-Beta.bak"
+    $temp = "$ictpath\ICTools-Beta.temp.psm1"
+          }else{
+  #Production Variables
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
-    $psptest = Test-Path $Profile
-    $psp = New-Item –Path $Profile –Type File –Force
     $file = "$ictpath\ICTools.psm1"
     $bakfile = "$ictpath\ICtools.bak"
     $temp = "$ictpath\ICTools.temp.psm1"
+          }
+
     $webclient = New-Object System.Net.WebClient
+    $psptest = Test-Path $Profile
+    $psp = New-Item –Path $Profile –Type File –Force
 }
 Process{
 #Make Directories
@@ -1422,7 +1435,7 @@ $webclient.downloadfile($url, $file)
 End{
 #Planned for Version number check to temp and only update if not latest version
 write-host -ForegroundColor Green("Reloading Powershell to access updated module")
-start-sleep -seconds 3
+start-sleep -seconds 2
 
 
 if($NoRestart){
