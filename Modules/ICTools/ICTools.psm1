@@ -1156,17 +1156,25 @@ function Add-DHCPv4Reservation {
 
 function Get-LTServerAdd {
 <#
-.SYNOPSIS This command is for checking online domain computers for the proper labtech reporting server setting and returning that information.
-.DESCRIPTION Checks a registry key in the labtech hive to see if the server has been properly configured for the Labtech agent. It reports back
+.SYNOPSIS
+This command is for checking online domain computers for the proper labtech reporting server setting and returning that information.
+.DESCRIPTION
+Checks a registry key in the labtech hive to see if the server has been properly configured for the Labtech agent. It reports back
 on the setting and if labtech was actually installed. It can also be set to email reports
-.PARAMETER LogDir This parameter sets the working dirctory for the command. The default is C:\temp
-.PARAMETER ServerAddr This parameter specifies the correct server address for the Labtech reporting server. Currently set to "https://cwa.incare360.com" by default
-.PARAMETER Exclude Specifies if certain computers should be excluded from the scan. The options are Servers, Workstations, or a list in a csv file. The file should
+.PARAMETER LogDir
+This parameter sets the working dirctory for the command. The default is C:\temp
+.PARAMETER ServerAddr
+This parameter specifies the correct server address for the Labtech reporting server. Currently set to "https://cwa.incare360.com" by default
+.PARAMETER Exclude
+Specifies if certain computers should be excluded from the scan. The options are Servers, Workstations, or a list in a csv file. The file should
 have only one column called name
-.PARAMETER Report This specifies if the command should send a report through email. It only emails a report if there are machines misconfigured or without the InCare agent.
+.PARAMETER Report
+This specifies if the command should send a report through email. It only emails a report if there are machines misconfigured or without the InCare agent.
 If this Parameter is selected then a set of credentials needs to be saved in the working directory using the Protect-creds command.
-.PARAMETER Email Specifies the email address the report should be sent to.
-.PARAMETER ClientName Specifies the name of the client the report is being run from.
+.PARAMETER Email
+Specifies the email address the report should be sent to.
+.PARAMETER ClientName
+Specifies the name of the client the report is being run from.
 
 #>
     [cmdletbinding(DefaultParameterSetName="Default")]
