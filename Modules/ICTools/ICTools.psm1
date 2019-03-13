@@ -1175,7 +1175,18 @@ If this Parameter is selected then a set of credentials needs to be saved in the
 Specifies the email address the report should be sent to.
 .PARAMETER ClientName
 Specifies the name of the client the report is being run from.
-
+.Example
+Get-LTServerAdd 
+This will check all currently online domain computers for the correct server setting and export the results to C:\Temp
+.Example 
+Get-LTServerAdd -Logdir C:\AgentCheck -Exclude Servers
+This will check all currently online domain workstations and not the servers. The results will be exported to C:\AgentCheck
+.Example
+GEt-LTServerAdd -Report -Email someone@InCare360.com -ClientName "USA HealthCare"
+Check all online computers in the domain, if any do not have the correct server setting, or have labtech installed a report will be emailed to "someone@incare360.com"
+.Example
+powershell.exe -noexit -command  &{Get-LTServerAdd -LogDir C:\Users\incare\Documents\LTAgent -report -email someone@incare360.com -ClientName "A Client"}; exit
+Using this format the command can be added to the windows task scheduler. Make sure it is set to run during regular business hours when the most Computers will be online.
 #>
     [cmdletbinding(DefaultParameterSetName="Default")]
         param(
