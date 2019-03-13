@@ -1,7 +1,6 @@
-<# THIS BETA VERSION IS FOR TESTING ONLY!!!! #>
+<#THIS BETA VERSION FOR TESTING ONLY!!!!#>
 
-
-Function Get-InactiveUsers {
+﻿Function Get-InactiveUsers {
 <#
 .SYNOPSIS Function for retrieving,disabling, and moving user accounts that have not been used in a specified amount of time.
 .DESCRIPTION Allows an admin to process stale user accounts by finding user accounts that havent been used in a determined amount of time and then either exporting them
@@ -1406,19 +1405,17 @@ Begin{
 if($Beta){
   #Beta Variables
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools-Beta.psm1"
-    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools-Beta"
-    $file = "$ictpath\ICTools-Beta.psm1"
-    $bakfile = "$ictpath\ICtools-Beta.bak"
-    $temp = "$ictpath\ICTools-Beta.temp.psm1"
           }else{
   #Production Variables
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
+
+          }
+
+  #Constant Variables
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
     $file = "$ictpath\ICTools.psm1"
     $bakfile = "$ictpath\ICtools.bak"
     $temp = "$ictpath\ICTools.temp.psm1"
-          }
-
     $webclient = New-Object System.Net.WebClient
     $psptest = Test-Path $Profile
     $psp = New-Item –Path $Profile –Type File –Force
