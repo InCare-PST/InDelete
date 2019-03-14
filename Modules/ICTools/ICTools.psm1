@@ -1109,8 +1109,8 @@ Synopsis
                     $runspace.Status = $null
                 }
             }
-            $PsRemotingEnabled = $onlinecomps.where({$_.PsRemoting -eq "Enabled"})
-            $PsRemotingDisabled = $onlinecomps.where({$_.PsRemoting -eq "Disabled"})
+            $PsRemotingEnabled = $onlinecomps | where {$_.PsRemoting -eq "Enabled"}
+            $PsRemotingDisabled = $onlinecomps | where {$_.PsRemoting -eq "Disabled"}
             Write-Output "$($onlinecomps.count) have been detected online"
             Write-Output "$($PsRemotingEnabled.count) are responding via PSRemote"
             Write-Output "$($PsRemotingDisabled.count) need to have PSRemoting enabled or addressed"
