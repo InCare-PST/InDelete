@@ -1432,18 +1432,22 @@ $webclient.downloadfile($url, $file)
 }
 End{
 #Planned for Version number check to temp and only update if not latest version
-write-host -ForegroundColor Green("Reloading Powershell to access updated module")
+write-host -ForegroundColor Green("`n`n InCare Tools has been Updated!")
 start-sleep -seconds 2
 
 
 if($NoRestart){
+write-host -ForegroundColor Green("`n`nThe NoRestart switch is no longer needed")
 Import-Module ICTools
 Remove-Module ICTools
 Import-Module ICTools
 }
 else{
-start-process PowerShell
-stop-process -Id $PID
+#start-process PowerShell
+#stop-process -Id $PID
+Import-Module ICTools
+Remove-Module ICTools
+Import-Module ICTools
 }
 
 }
@@ -1496,4 +1500,46 @@ if(!(test-path $regpath)){
 #End function
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular
+Function Create-ICToolsManifest {
+
+BEGIN{
+    #[Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
+    $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
+    $releaseurl = "https://github.com/InCare-PST/ICTools/releases/latest"
+    $ProjectUri = "https://github.com/InCare-PST/ICTools"
+    $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
+    $psptest = Test-Path $Profile
+    $psp = New-Item –Path $Profile –Type File –Force
+    $file = "$ictpath\ICTools.psm1"
+    $bakfile = "$ictpath\ICtools.bak"
+    $temp = "$ictpath\ICTools.temp.psm1"
+    $manifest = "$ictpath\ICTools.psd1"
+    #$webclient = New-Object System.Net.WebClient
+    #$Version = (Invoke-WebRequest $releaseurl -UseBasicParsing).links | Where {$_.Title -NotMatch "GitHub"} #-and $_.Title -GT "0"} | Select -Unique Title
+    $company = "Incare Technologies"
+    $Author = "InCare PST"
+    #$version = (Get-Content $file -Head 1).trim('#VERSION=')
+    $version = "0.0.1"
+
+}
+PROCESS{
+  if(Test-Path -Path $file){new-modulemanifest -Path $manifest -RootModule $file -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri
+        }
+  else{
+      update-ictools -NoRestart
+      new-modulemanifest -Path $manifest -RootModule $file -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri
+      }
+
+       }
+
+
+
+END{
+remove-module ICTools
+import-module ICTools
+write-host -ForegroundColor Green "`n`nManifest Created"
+}
+
+}
+
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular,Create-ICToolsManifest
