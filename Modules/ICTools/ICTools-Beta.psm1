@@ -1500,7 +1500,7 @@ if(!(test-path $regpath)){
 #End function
 }
 
-Function Create-ICToolsManifest {
+Function New-ICToolsManifest {
 
 BEGIN{
     #[Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
@@ -1542,4 +1542,4 @@ write-host -ForegroundColor Green "`n`nManifest Created"
 
 }
 
-Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular,Create-ICToolsManifest
+Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular,New-ICToolsManifest
