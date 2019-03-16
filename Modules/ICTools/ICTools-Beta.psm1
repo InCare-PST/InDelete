@@ -1394,7 +1394,8 @@ Function Update-ICTools {
     [cmdletbinding()]
     param(
         [switch]$NoRestart,
-        [switch]$Beta
+        [switch]$Beta,
+        [switch]$NoManifest
       )
 
 
@@ -1438,17 +1439,11 @@ start-sleep -seconds 2
 
 if($NoRestart){
 write-host -ForegroundColor Green("`n`nThe NoRestart switch is no longer needed")
-Import-Module ICTools
-Remove-Module ICTools
-Import-Module ICTools
-}
-else{
 #start-process PowerShell
 #stop-process -Id $PID
-Import-Module ICTools
-Remove-Module ICTools
-Import-Module ICTools
 }
+
+if(!$NoRefresh){Reset-ICTools}
 
 }
 
@@ -1502,6 +1497,7 @@ if(!(test-path $regpath)){
 
 Function New-ICToolsManifest {
 
+
 BEGIN{
     #[Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
@@ -1511,9 +1507,10 @@ BEGIN{
     $psptest = Test-Path $Profile
     $psp = New-Item –Path $Profile –Type File –Force
     $file = "$ictpath\ICTools.psm1"
-    $bakfile = "$ictpath\ICtools.bak"
+    $bakfile = "$ictpath\ICtools.psm1.bak"
     $temp = "$ictpath\ICTools.temp.psm1"
     $manifest = "$ictpath\ICTools.psd1"
+    $bakmanifest = "$ictpath\ICTools.psd1.bak"
     #$webclient = New-Object System.Net.WebClient
     #$Version = (Invoke-WebRequest $releaseurl -UseBasicParsing).links | Where {$_.Title -NotMatch "GitHub"} #-and $_.Title -GT "0"} | Select -Unique Title
     $company = "Incare Technologies"
@@ -1523,23 +1520,29 @@ BEGIN{
 
 }
 PROCESS{
-  if(Test-Path -Path $file){new-modulemanifest -Path $manifest -RootModule $file -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri
+        try{Test-Path -Path $file
         }
-  else{
-      update-ictools -NoRestart
-      new-modulemanifest -Path $manifest -RootModule $file -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri
-      }
-
+        catch{
+              update-ictools -NoRefresh
+              }
+        finally{new-modulemanifest -Path $manifest -RootModule $file -CompanyName $company -Author $Author -ModuleVersion $version -ProjectUri $ProjectUri}
        }
 
 
 
 END{
-remove-module ICTools
-import-module ICTools
+reset-ICTools
 write-host -ForegroundColor Green "`n`nManifest Created"
 }
 
 }
+
+Function Reset-ICTools{
+  Import-Module ICTools
+  Remove-Module ICTools
+  Import-Module ICTools
+}
+
+
 
 Export-ModuleMember -Function Set-LTServerAdd,Get-InactiveUsers,Remove-Emotet,Remove-EmotetLegacy,Remove-MalFiles,Get-OnlineADComps,Add-DHCPv4Reservation,Get-LTServerAdd,Protect-Creds,Update-ICTools,Install-PSExec,Import-ICTHistory,Set-FixCellular,New-ICToolsManifest
