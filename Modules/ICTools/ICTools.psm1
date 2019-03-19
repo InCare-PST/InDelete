@@ -1305,6 +1305,7 @@ Using this format the command can be added to the windows task scheduler. Make s
         Remove-Job -Name Verify -ErrorAction SilentlyContinue
         if ($report){
             Remove-Item -Path $LogDir\Get_LTAddr_Log.csv -ErrorAction SilentlyContinue
+            Get-ChildItem $logdir\nopsremoting* | where {$_.creationtime -le ((get-date).AddDays(-7))} | remove-item
         }
         else{
             $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
