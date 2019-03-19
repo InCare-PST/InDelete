@@ -50,7 +50,7 @@ Import-Module ICTools
 
 #End of Function
 }
-Function Create-ICToolsManifest {
+Function New-ICToolsManifest {
 
 BEGIN{
     #[Net.ServicePointManager]::SecurityProtocol = "Tls12, Tls11, Tls, Ssl3"
@@ -91,4 +91,4 @@ write-host -ForegroundColor Green "`n`nICTools Manifest has been created!"
 }
 
 }
-Create-ICToolsManifest
+New-ICToolsManifest

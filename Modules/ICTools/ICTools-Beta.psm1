@@ -1520,6 +1520,10 @@ BEGIN{
 
 }
 PROCESS{
+
+  if(Test-Path -Path $bakmanifest){Remove-Item -Path $bakmanifest -Force}
+  if(Test-Path -Path $manifest){Rename-Item -Path $manifest -NewName $bakmanifest -Force}
+
         try{Test-Path -Path $file
         }
         catch{
@@ -1540,7 +1544,7 @@ write-host -ForegroundColor Green "`n`nManifest Created"
 Function Reset-ICTools{
   Import-Module ICTools
   Remove-Module ICTools
-  Import-Module ICTools
+  Import-Module ICTools -Verbose
 }
 
 
