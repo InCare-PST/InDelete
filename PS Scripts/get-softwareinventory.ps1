@@ -101,9 +101,9 @@
         #Setup Message Criteria
     }
     process{
-        $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
-        $TotalServers = $computers | where operatingsystem -Match server    
-        $TotalWorkstations = $computers | where operatingsystem -NotMatch server
+        $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where {$_.lastlogondate -GE $date}
+        $TotalServers = $computers | where {$_.operatingsystem -Match "server"}    
+        $TotalWorkstations = $computers | where {$_.operatingsystem -NotMatch "server"}
         #Check Which computers can be contacted
         foreach($comp in $computers) {
             $paramlist = @{
@@ -124,8 +124,8 @@
                 $runspace.Status = $null
             }
         }
-        $workstations = $OnlineComps | where operatingsystem -NotMatch server
-        $servers = $OnlineComps | where operatingsystem -Match server
+        $workstations = $OnlineComps | where {$_.operatingsystem -NotMatch "server"}
+        $servers = $OnlineComps | where {$_.operatingsystem -Match "server"}
         $ComputerSummary = @{
             "Total Servers" = $TotalServers.count
             "OnLine Servers" = $servers.count
