@@ -8,39 +8,30 @@ function Set-FirewallPrivate{
 
   [cmdletbinding()]
   param(
-      [switch]$NoRestart
+      [switch]$UmbrellaOnly
     )
 
 $alpha = @()
 $bravo = @()
-$alpha = (Get-childitem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles" | Get-ItemProperty -Name Category | Where Category -eq 0).pspath
-$bravo += $alpha.trim("Microsoft.PowerShell.Core\")
+
+if($UmbrellaOnly){
+  $alpha =  (Get-childitem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles" | Get-ItemProperty -Name ProfileName | Where ProfileName -match "Umbrella").pspath
+}else{
+  $alpha = (Get-childitem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles" | Get-ItemProperty -Name Category | Where Category -eq 0).pspath
+}
+if([bool]$alpha){$bravo += $alpha.trim("Microsoft.PowerShell.Core\")
+}else{
+  write-host -Foregroundcolor Red "ERROR: There are no profiles selected"
+  start-sleep 2
+  Exit
+}
 
 foreach($b in $bravo){
 set-itemproperty -path $b -Name Category -Value 1 -ErrorAction SilentlyContinue
 set-itemproperty -path $b -Name CategoryType -Value 0 -ErrorAction SilentlyContinue
 write-host -Foregroundcolor Green (($(get-itemproperty -path $b -Name ProfileName).profilename) + ": has been updated")
 }
-
-if(!$NoRestart){
-    Add-Type -AssemblyName PresentationCore,PresentationFramework
-    $ButtonType = [System.Windows.MessageBoxButton]::YesNo
-    $MessageIcon = [System.Windows.MessageBoxImage]::Exclamation
-    $MessageBody = "This script requires a reboot, would you like to reboot now?"
-    $MessageTitle = "Confirm Reboot"
-
-    $Result = [System.Windows.MessageBox]::Show($MessageBody,$MessageTitle,$ButtonType,$MessageIcon)
-    switch ($Result){
-    "Yes" {
-            write-host -ForegroundColor Green"Windows will restart in 30 seconds"
-            start-sleep 30
-            restart-computer -force
-     }
-    "No" {
-    write-host -ForegroundColor Red "Please restart your computer later"
-
-    }
-  }
-}
+#Restarting Location Awareness
+Restart-Service NlaSvc -Force
 }
 Set-FirewallPrivate
