@@ -19,7 +19,7 @@ $bravo += $alpha.trim("Microsoft.PowerShell.Core\")
 foreach($b in $bravo){
 set-itemproperty -path $b -Name Category -Value 1 -ErrorAction SilentlyContinue
 set-itemproperty -path $b -Name CategoryType -Value 0 -ErrorAction SilentlyContinue
-write-host -Foregroundcolor Green (($(get-itemproperty -path $b -Name ProfileName).profilename) + ": has been updated"
+write-host -Foregroundcolor Green (($(get-itemproperty -path $b -Name ProfileName).profilename) + ": has been updated")
 }
 
 if(!$NoRestart){
@@ -41,5 +41,6 @@ if(!$NoRestart){
 
     }
   }
+}
 }
 Set-FirewallPrivate
