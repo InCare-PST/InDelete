@@ -1372,7 +1372,7 @@ synopsis
                         try {
                             $keychanged = "Yes"
                             #Stop-Service LTSvcMon,LTService -ErrorAction SilentlyContinue
-                            Stop-Process LTSVC,LTSvcMon,LTTray -ErrorAction SilentlyContinue
+                            Stop-Process -Name LTSVC,LTSvcMon,LTTray -Force -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path HKLM:\software\LabTech\Service\ -Name "server address" -Value $ServerAddr -ErrorAction SilentlyContinue
                             Start-Service LTSvcMon,LTService -ErrorAction SilentlyContinue
                         }
