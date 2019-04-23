@@ -167,7 +167,7 @@ Synopsis
                     $deletedfiles = @()
                     $ComputerName = $env:COMPUTERNAME
                     if (Test-Path -Path "C:\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path C:\windows\syswow64 *.exe | where {$_.creationtime -ge (get-date).AddDays(-3) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
+                        $file = Get-ChildItem -Path C:\windows\syswow64 *.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-3) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -218,7 +218,7 @@ Synopsis
                             }
                     }
                     if (!(Test-Path -Path "C:\windows\SysWOW64")) {
-                        $file = Get-ChildItem -Path C:\windows\system32 *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
+                        $file = Get-ChildItem -Path C:\windows\system32 *.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -268,7 +268,7 @@ Synopsis
                                 write-host "$ComputerName 32 Bit System Did not detect Dropper" -ForegroundColor Green
                             }
                     }
-                    $file = get-childitem -Path C:\Windows*.exe,c:\windows\temp\*.exe | where {$_.creationtime -ge (get-date).AddDays(-2) -and $_.Name -match "(?i)(\w{8}\.exe)" -and $_.name -notmatch $excludewin}
+                    $file = get-childitem -Path C:\Windows*.exe,c:\windows\temp\*.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-2) -and $_.Name -match "(?i)(\w{8}\.exe)" -and $_.name -notmatch $excludewin}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -318,7 +318,7 @@ Synopsis
                             }else{
                                 write-host "$ComputerName Windows Directory does not have any emotet files" -ForegroundColor Green
                             }
-                    $file = get-childitem -path C:\Users\*\AppData\Roaming,c:\windows\ * -Recurse -Force -ErrorAction SilentlyContinue | where {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^tetup\.exe|^wbM\w+\.exe|^mtwvc\.exe" -or $_.FullName -match "(?i)(appdata\\.*\\aim\w$)|(appdata\\.*\\WSOG$)|(appdata\\.*\\AMNI$)|(appdata\\.*\\WSIGE$)"}
+                    $file = get-childitem -path C:\Users\*\AppData\Roaming,c:\windows\ * -Recurse -Force -ErrorAction SilentlyContinue | Where-Object {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^tetup\.exe|^wbM\w+\.exe|^mtwvc\.exe" -or $_.FullName -match "(?i)(appdata\\.*\\aim\w$)|(appdata\\.*\\WSOG$)|(appdata\\.*\\AMNI$)|(appdata\\.*\\WSIGE$)"}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -368,7 +368,7 @@ Synopsis
                             }else{
                                 Write-Host "$ComputerName C:\Users\Username\Appdata and C:\Windows does not have 44 Trickbot files" -ForegroundColor Green
                             }
-                    $file = get-childitem -path C:\  *.exe | where {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^mtwvc\.exe"}
+                    $file = get-childitem -path C:\  *.exe | Where-Object {$_.name -match "^44\w{62}\.exe$|^m\w\wvca\.exe$|^mtwvc\.exe"}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -418,7 +418,7 @@ Synopsis
                             }else{
                                 write-host "$ComputerName C:\ Directory does not have 44 Trickbot files" -ForegroundColor Green
                             }
-                    $file = get-childitem -path C:\Windows\System32\Tasks  * | where {$_.name -match "Msne?tcs|Sysnetsf"}
+                    $file = get-childitem -path C:\Windows\System32\Tasks  * | Where-Object {$_.name -match "Msne?tcs|Sysnetsf"}
                             if([bool]$file){
                                 foreach ($bfile in $file){
                                 if ([bool]$bfile){
@@ -518,7 +518,7 @@ Synopsis
                     $serversn = $Computer.name
                     Start-Job {Start-Process $Logdir\psexec.exe -ArgumentList "\\$serversn -s winrm.cmd quickconfig -q" -NoNewWindow}
                     if (Test-Path -Path "\\$serversn\c$\windows\SysWOW64") {
-                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
+                        $file = Get-ChildItem -Path "C:\windows\syswow64" *.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude64}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -561,7 +561,7 @@ Synopsis
                         }
                     }
                     if (!(Test-Path -Path "\\$serversn\c$\SysWOW64")) {
-                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
+                        $file = Get-ChildItem -Path "C:\windows\system32" *.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.name -ne $_.originalname -and $_.name -notmatch $exclude32}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -603,7 +603,7 @@ Synopsis
                                 }
                         }
                     }
-                    $file = get-childitem -Path "\\$serversn\c$\Windows" *.exe | where {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.Name -match "(?i)(\w{8}\.exe)"}
+                    $file = get-childitem -Path "\\$serversn\c$\Windows" *.exe | Where-Object {$_.creationtime -ge (get-date).AddDays(-1.5) -and $_.Name -match "(?i)(\w{8}\.exe)"}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -690,7 +690,7 @@ Synopsis
                 $NWRM = Import-Clixml -Path $LogDir\NOWRM.xml
             }
             else {
-                $computers = Get-ADComputer -Filter * -Properties LastLogonDate | where lastlogondate -GE $date
+                $computers = Get-ADComputer -Filter * -Properties LastLogonDate | Where-Object {$_.lastlogondate -GE $date}
                 ForEach ($comp in $computers) {
                     if (Test-Connection -ComputerName $comp.name -Count 1 -Quiet) {
                         Write-Host $comp.name "is Alive"
@@ -915,7 +915,7 @@ Synopsis
                                 write-host "$ComputerName C:\Users and C:\Windows does not have 44Trojan files" -ForegroundColor Green
                                 }
                             }#>
-                    $file = get-childitem -path C:\programdata *.dll -Recurse -Force -ErrorAction SilentlyContinue | where {$_.name -match "\w{8}-(\w{4}-){3}\w{12}\.dll"}
+                    $file = get-childitem -path C:\programdata *.dll -Recurse -Force -ErrorAction SilentlyContinue | Where-Object {$_.name -match "\w{8}-(\w{4}-){3}\w{12}\.dll"}
                             foreach ($bfile in $file){
                                 if ([bool]$bfile){
                                     $filedeleted = $false
@@ -1086,7 +1086,7 @@ Synopsis
             if($LogOnly -or $RunOnce){
                 $RunTimeLoop = (Get-Date)
             }
-            $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | where lastlogondate -GE $date
+            $computers = Get-ADComputer -Filter * -Properties LastLogonDate,OperatingSystem | Where-Object {$_.lastlogondate -GE $date}
             foreach($comp in $computers) {
                 $paramlist = @{
                     Comp = $comp.name
@@ -1109,8 +1109,8 @@ Synopsis
                     $runspace.Status = $null
                 }
             }
-            $PsRemotingEnabled = $onlinecomps | where {$_.PsRemoting -eq "Enabled"}
-            $PsRemotingDisabled = $onlinecomps | where {$_.PsRemoting -eq "Disabled"}
+            $PsRemotingEnabled = $onlinecomps | Where-Object {$_.PsRemoting -eq "Enabled"}
+            $PsRemotingDisabled = $onlinecomps | Where-Object {$_.PsRemoting -eq "Disabled"}
             Write-Output "$($onlinecomps.count) have been detected online"
             Write-Output "$($PsRemotingEnabled.count) are responding via PSRemote"
             Write-Output "$($PsRemotingDisabled.count) need to have PSRemoting enabled or addressed"
@@ -1240,9 +1240,9 @@ Using this format the command can be added to the windows task scheduler. Make s
             }
         }
         switch ($Exclude){
-            "Servers" {$ComputerName = ($WRMComp | where {$_.operatingsystem -notmatch "server"}).name}
-            "Workstations" {$ComputerName = ($WRMComp | where {$_.operatingsystem -match "server"}).name}
-            "List" {$ComputerName = $WRMComp.name;$Excludes = Import-Csv $LogDir\exclude.csv;foreach ($ex in $Excludes.name){$ComputerName = $ComputerName | where {$_ -notmatch $ex}} }
+            "Servers" {$ComputerName = ($WRMComp | Where-Object {$_.operatingsystem -notmatch "server"}).name}
+            "Workstations" {$ComputerName = ($WRMComp | Where-Object {$_.operatingsystem -match "server"}).name}
+            "List" {$ComputerName = $WRMComp.name;$Excludes = Import-Csv $LogDir\exclude.csv;foreach ($ex in $Excludes.name){$ComputerName = $ComputerName | Where-Object {$_ -notmatch $ex}} }
             default {$ComputerName = $WRMComp.name}
         }
     }
@@ -1256,7 +1256,7 @@ Using this format the command can be added to the windows task scheduler. Make s
                 }
             }
             else{
-                $installcheck = Get-WmiObject -Class Win32_Product | where {$_.name -match "labtech"}
+                $installcheck = Get-WmiObject -Class Win32_Product | Where-Object {$_.name -match "labtech"}
                 if ([bool]$installcheck){
                     $installstate = "Server Address not found"
                 }
@@ -1273,7 +1273,7 @@ Using this format the command can be added to the windows task scheduler. Make s
 
         } | Select-Object Computername,ServerAddress #|Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
         if ($report){
-            $agentissues = $agentlist | where {$_.serveraddress -ne $ServerAddr}
+            $agentissues = $agentlist | Where-Object {$_.serveraddress -ne $ServerAddr}
             if ([bool]$agentissues){
                 $agentissues | Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
                 $b = $agentissues | ConvertTo-Html -Fragment -PreContent "<h2>LTAgent Issues:</h2>" | Out-String
@@ -1305,7 +1305,7 @@ Using this format the command can be added to the windows task scheduler. Make s
         Remove-Job -Name Verify -ErrorAction SilentlyContinue
         if ($report){
             Remove-Item -Path $LogDir\Get_LTAddr_Log.csv -ErrorAction SilentlyContinue
-            Get-ChildItem $logdir\nopsremoting* | where {$_.creationtime -le ((get-date).AddDays(-7))} | remove-item
+            Get-ChildItem $logdir\nopsremoting* | Where-Object {$_.creationtime -le ((get-date).AddDays(-7))} | remove-item
         }
         else{
             $FTimeStamp = (Get-Date -Format "dd-MM-yyyy HH-mm-ss")
