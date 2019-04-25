@@ -1323,6 +1323,8 @@ synopsis
     [cmdletbinding()]
         param(
 
+            [Parameter(Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
             [string[]]$ComputerName,
 
             [string]$Logdir = "C:\temp",
