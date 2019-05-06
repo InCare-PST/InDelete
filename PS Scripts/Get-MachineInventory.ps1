@@ -24,6 +24,11 @@
                 $protocol
             )
             $option = New-CimSessionOption -Protocol $protocol
+            $params = @{'ComputerName'=$ComputerName
+                        'SessionOption'=$option
+                        'ErrorAction'='Stop'}
+            Write-Verbose "Connecting to $ComputerName over $protocol"
+            $session = New-CimSession @params
         }
     }
     End{
