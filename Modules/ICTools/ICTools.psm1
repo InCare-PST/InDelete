@@ -1214,6 +1214,8 @@ Using this format the command can be added to the windows task scheduler. Make s
 
         )
     Begin{
+        $CurrentFullLTVersion = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'Version'
+        $CurrentLTVersion = ([regex]::Match($CurrentFullLTVersion, '.*(?=\.)')).value
         if($report){
             $credentials = Import-Clixml -path "$logdir\incare.xml"
         }
@@ -1249,10 +1251,12 @@ Using this format the command can be added to the windows task scheduler. Make s
     Process{
         $agentlist = Invoke-Command -ComputerName $ComputerName{
             $serveraddress = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'server address'
+            $ltversion = (Get-ItemProperty -Path HKLM:\software\LabTech\Service\).'Version'
             If ([bool]$serveraddress) {
                 $tempobj = @{
                     Computername = $env:COMPUTERNAME
                     ServerAddress = $serveraddress
+                    LTVersion = $ltversion
                 }
             }
             else{
@@ -1265,15 +1269,16 @@ Using this format the command can be added to the windows task scheduler. Make s
                 }
                 $tempobj = @{
                     Computername = $env:COMPUTERNAME
-                    ServerAddress = "$installstate"
+                    ServerAddress = $installstate
+                    LTVersion = "NA"
                 }
             }
             $ExportObj = New-Object -TypeName psobject -Property $tempobj
             $ExportObj
 
-        } | Select-Object Computername,ServerAddress #|Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
+        } | Select-Object Computername,ServerAddress,LTVersion #|Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
         if ($report){
-            $agentissues = $agentlist | Where-Object {$_.serveraddress -ne $ServerAddr}
+            $agentissues = $agentlist | Where-Object {$_.serveraddress -ne $ServerAddr -or ([regex]::Match($_.LTVersion,'.*(?=\.)')).value -ne $CurrentLTVersion}
             if ([bool]$agentissues){
                 $agentissues | Export-Csv -Path $LogDir\Get_LTAddr_Log.csv -Append -Force -NoTypeInformation
                 $b = $agentissues | ConvertTo-Html -Fragment -PreContent "<h2>LTAgent Issues:</h2>" | Out-String
