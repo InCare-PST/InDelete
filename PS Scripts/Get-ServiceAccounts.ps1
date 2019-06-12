@@ -22,11 +22,22 @@
         $wsmanopt = New-CimSessionOption -Protocol Wsman
         Write-Verbose "Establishing Connection to servers"
         foreach($onlineserver in $onlineservers){
-            try{
-                New-CimSession -ComputerName $onlineserver.name -SessionOption $wsmanopt -ErrorAction Stop 
+            Write-Verbose "Checking for WSMAN"
+            If([bool](Test-WSMan -ComputerName $onlineserver.name)){
+                try{
+                    New-CimSession -ComputerName $onlineserver.name -SessionOption $wsmanopt -ErrorAction Stop 
+                }
+                catch{
+                }
             }
-            catch{
-                New-CimSession -ComputerName $onlineserver.name -SessionOption $dcomopt
+            else{
+                Write-Verbose "Attempting DCOM because WSMAN unavailable"
+                try{
+                    New-CimSession -ComputerName $onlineserver.name -SessionOption $dcomopt -ErrorAction Stop
+                }
+                catch{
+                
+                }
             }
         }
         Get-CimInstance -ClassName win32_service | select startname
