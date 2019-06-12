@@ -20,11 +20,14 @@
     Process{
         $dcomopt = New-CimSessionOption -Protocol Dcom
         $wsmanopt = New-CimSessionOption -Protocol Wsman
+        $wsmanerrors = @()
+        $dcomerrors = @()
         Write-Verbose "Establishing Connection to servers"
         foreach($onlineserver in $onlineservers){
             Write-Verbose "Checking for WSMAN"
             If([bool](Test-WSMan -ComputerName $onlineserver.name)){
                 try{
+                    Write-Verbose "Attempting to connect to $onlineserver via WSMAN"
                     New-CimSession -ComputerName $onlineserver.name -SessionOption $wsmanopt -ErrorAction Stop 
                 }
                 catch{
@@ -33,6 +36,7 @@
             else{
                 Write-Verbose "Attempting DCOM because WSMAN unavailable"
                 try{
+                    Write-Verbose "Attempting to connect to $onlineserver via DCOM"
                     New-CimSession -ComputerName $onlineserver.name -SessionOption $dcomopt -ErrorAction Stop
                 }
                 catch{
