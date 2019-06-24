@@ -43,8 +43,8 @@
                 
                 }
             }
-        }NetworkService
-        Get-CimInstance -CimSession (Get-CimSession) -ClassName win32_service | where {$_.startname -notmatch "local|NetworkService" -and $_.StartName -ne $null}
+        }
+        Get-CimInstance -CimSession (Get-CimSession) -ClassName win32_service | where {$_.startname -notmatch "local|Network\sService|NetworkService" -and $_.StartName -ne $null}
     
     }
     End{
