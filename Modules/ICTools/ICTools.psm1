@@ -610,7 +610,7 @@ This parameter sets the working dirctory for the command. The default is C:\temp
 .PARAMETER ServerAddr
 This parameter specifies the correct server address for the Labtech reporting server. Currently set to "https://cwa.incare360.com" by default
 .PARAMETER Exclude
-Specifies if certain computers should be excluded from the scan. The options are Servers, Workstations, or a list in a csv file. The file should
+Specifies if certain computers should be excluded from the scan. The options are Servers, Workstations, or a list in a csv file called exclude.csv. The file should
 have only one column called name
 .PARAMETER Report
 This specifies if the command should send a report through email. It only emails a report if there are machines misconfigured or without the InCare agent.
