@@ -1,4 +1,9 @@
 Function Get-ICTBacklog {
+<#
+Insert some rando explanation here...
+Script a bit slow processing dfsrdiag command, see if it can be sped up
+#>
+
 $backlog = dfsrdiag backlog /rgname:'Public Data' /rfname:D /smem:WIN-VCPI01XMY7P /rmem:WSG-DC01
 
   write-host -ForegroundColor Red ($backlog | Select-String 'Backlog File Count')
