@@ -6,7 +6,7 @@ BEGIN{
     $url = "https://raw.githubusercontent.com/InCare-PST/ICTools/master/Modules/ICTools/ICTools.psm1"
     $ictpath = "$Home\Documents\WindowsPowerShell\Modules\ICTools"
     $psptest = Test-Path $Profile
-    $psp = New-Item –Path $Profile –Type File –Force
+    $psp = New-Item -Path $Profile -Type File -Force
     $file = "$ictpath\ICTools.psm1"
     $bakfile = "$ictpath\ICtools.bak"
     $temp = "$ictpath\ICTools.temp.psm1"
