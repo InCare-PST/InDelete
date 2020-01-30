@@ -3,7 +3,7 @@ $restorelist = @()
 $failedlist = @()
 $tpath = "c:\temp"
 
-$Files = (Get-ChildItem -Include *.jse -path d:\data\accounting -recurse | Where {$_.LastWriteTime -GE (Get-Date).AddDays(-3)})
+$Files = (Get-ChildItem -Include *.jse -path d:\ -recurse | Where {$_.LastWriteTime -GE (Get-Date).AddDays(-3)})
 
 Foreach ($file in $files){
   $pass1 = $file.FullName
@@ -28,12 +28,14 @@ Foreach ($file in $files){
   $RestoreList += $LogObj
 
     }else{
+      write-host -ForegroundColor Red "`n"$pass3" Copy Failed!`n"
+
     $tempobj = @{
-  CorruptedFile = $file.Name
-  CorruptedFilePath = $file.DirectoryName
-  Status = "Failed"
-  TimeStamp = (Get-Date -Format "dd-MM-yyyy HH:mm:ss")
-  FullPath = $file.fullname
+    CorruptedFile = $file.Name
+    CorruptedFilePath = $file.DirectoryName
+    Status = "Failed"
+    TimeStamp = (Get-Date -Format "dd-MM-yyyy HH:mm:ss")
+    FullPath = $file.fullname
   }
 
   $LogObj = New-Object -TypeName psobject -Property $tempobj
@@ -41,6 +43,7 @@ Foreach ($file in $files){
   $FailedList += $Fail
   $fail = $null
     }
-}
+
 $restorelist | Export-Csv -Path $tpath\Restoredlog.txt -NoTypeInformation -Append
 $failedlist | Export-Csv -Path $tpath\Failedlog.txt -NoTypeInformation -Append
+}

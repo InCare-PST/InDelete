@@ -5,14 +5,19 @@ $pool.Open()
 $runspaces = $results = @()
 # BLOCK 2: Create reusable scriptblock. This is the workhorse of the runspace. Think of it as a function.
 $scriptblock = {
-#
-#
-#
-#
-#
-#
-#
-#
+Param (
+[string]$connectionString,
+[object]$batch,
+[int]$batchsize
+)
+$bulkcopy = New-Object Data.SqlClient.SqlBulkCopy($connectionstring,"TableLock")
+$bulkcopy.DestinationTableName = "mytable"
+$bulkcopy.BatchSize = $batchsize
+$bulkcopy.WriteToServer($batch)
+$bulkcopy.Close()
+$dtbatch.Clear()
+$bulkcopy.Dispose()
+$dtbatch.Dispose()
 # return whatever you want, or don't.
 return $error[0]
 }
