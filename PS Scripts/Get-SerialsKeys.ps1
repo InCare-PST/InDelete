@@ -3,7 +3,15 @@ $serials=@()
 $key=@()
  Import-Module ActiveDirectory
     $date = (get-date).AddDays(-60)
-    $computers = Get-ADComputer -Filter * -Properties * | where {$_.lastlogondate -GE $date}
+    $allcomputers = Get-ADComputer -Filter * -Properties * | where {$_.lastlogondate -GE $date}
+
+
+  ForEach ($a in $allcomputers) {
+   if (Test-Connection -ComputerName $a.name -Count 1 -Quiet) {
+                $Computers += $a
+   }
+  }
+
 
 Foreach($comp in $computers){
 
@@ -23,4 +31,4 @@ Foreach($comp in $computers){
   #$serials += $LogObj
   $serials += $tempObj
   }
-  $serials | Export-Csv -Path c:\Temp\Serials_run4.csv -Append
+  $serials | Export-Csv -Path c:\Temp\Serials_Final7.csv -Append
